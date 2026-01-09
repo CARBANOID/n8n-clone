@@ -1,14 +1,14 @@
+# How to use ShadCN
+
+```tsx
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import pClient from "@/lib/db";
 
-export default async function Home1(){
-  const users = await pClient.user.findMany() ; 
+export default function Home1(){
   const temp : boolean = true ; 
   return (
     <div className="min-h-screen min-w-screen flex items-center justify-center">
-      {/* <Button variant="outline">Click Me</Button> */}
-      <div> {JSON.stringify(users)}</div>
+      <Button variant="outline">Click Me</Button>
     </div>
   )
 }
@@ -16,8 +16,10 @@ export default async function Home1(){
 export  function Home2(){
   const temp : boolean = true ; 
   return (
+    // Applying multiple conditional tailwind classes to a element (here div)
     <div className={cn("text-amber-700 font-extrabold",temp && "text-green-500")}>
       Welcome to the Home Page
     </div>
   )
 }
+```

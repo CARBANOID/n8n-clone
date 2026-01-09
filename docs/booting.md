@@ -9,4 +9,4 @@ npx prisma init
 npx prisma migrate dev 
 
 npx prisma studio  (shows the database in a web interface)
-npx prisma migrate reset  (resets the database / to remove all the data) 
+npx prisma migrate reset  (resets the database / to remove all the data)

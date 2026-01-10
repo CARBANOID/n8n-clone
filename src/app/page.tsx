@@ -7,6 +7,11 @@ import { Client } from "./client";
 import { getQueryClient , trpc} from "@/trpc/server";
 import { Suspense } from "react";
 
+/**
+ * Render a centered full-screen container that hydrates server-prefetched TRPC user data and mounts the client component inside a Suspense boundary.
+ *
+ * @returns A React element containing a full-screen centered layout with a HydrationBoundary (seeded from the server-prefetched query client) and a Suspense-wrapped Client component.
+ */
 export default  function Home(){
   const queryClient = getQueryClient() ;
   void  queryClient.prefetchQuery(trpc.getUsers.queryOptions()) ; // leveraging the speed of an Server Component by prefetching the data
@@ -50,18 +55,13 @@ export default async function Home(){
 */
 
 
-/* 
-// To fetch the TRPC data in Server Component
-
-export default async function Home(){
-  const users = await caller.getUsers() ; 
-  return (
-    <div className="min-h-screen min-w-screen flex items-center justify-center">
-      <div> {JSON.stringify(users)}</div>
-    </div>
-  )
-}
-*/
+/**
+ * Renders a styled "Welcome to the Home Page" message with a conditional green color.
+ *
+ * The component applies base amber, extra-bold text styles and conditionally adds a green text color when the internal `temp` flag is true.
+ *
+ * @returns A JSX element containing the styled welcome text.
+ */
 
 export  function Home2(){
   const temp : boolean = true ; 

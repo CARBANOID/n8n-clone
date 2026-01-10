@@ -2,7 +2,11 @@ import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from '@tanstack/react-query';
-// import superjson from 'superjson';
+/**
+ * Create a QueryClient configured for tRPC with sensible defaults for caching and dehydration.
+ *
+ * @returns A QueryClient with a 30-second query `staleTime` and a `shouldDehydrateQuery` policy that preserves queries which are pending or satisfy TanStack's default dehydration criteria.
+ */
 
 export function makeQueryClient() {
   // tanstack query configuration for trpc which creates a singleton tanstack query instance

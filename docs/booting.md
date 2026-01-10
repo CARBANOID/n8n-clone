@@ -10,3 +10,8 @@ npx prisma migrate dev
 
 npx prisma studio  (shows the database in a web interface)
 npx prisma migrate reset  (resets the database / to remove all the data)
+
+# install trpc modules 
+https://trpc.io/docs/client/tanstack-react-query/server-components
+
+-> npm install @trpc/server @trpc/client @trpc/tanstack-react-query @tanstack/react-query@latest zod client-only server-only

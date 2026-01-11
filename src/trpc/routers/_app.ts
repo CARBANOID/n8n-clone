@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { baseProcedure, createTRPCRouter } from '../init';
+import { createTRPCRouter, protectedProcedure } from '../init';
 import pClient from '@/lib/db';
 
 /*
@@ -14,7 +14,7 @@ in trpc we call the procedure directly as a function
 */
 
 export const appRouter = createTRPCRouter({
-  getUsers : baseProcedure.query(() => {      
+  getUsers : protectedProcedure.query(({ctx}) => {      
       return pClient.user.findMany();
   }),
 });

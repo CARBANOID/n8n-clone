@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import pClient from '@/lib/db';
 import { inngest } from '@/inngest/client';
+
 
 /*
 baseProcedure is used to create endpoints / routes
@@ -15,6 +15,13 @@ in trpc we call the procedure directly as a function
 */
 
 export const appRouter = createTRPCRouter({
+  testAI : baseProcedure.mutation(async() =>{
+    await inngest.send({
+      name : "testAI/sum" ,
+    }) ;
+
+    return { success : true , message : "Job Queued"}
+  }),
   getWorkFlows : protectedProcedure.query(({ctx}) => {       // .query -> Fetch/read data without changing anything
 
       return pClient.workflow.findMany();

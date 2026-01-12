@@ -61,3 +61,5 @@ ERROR [portable_pty::win::psuedocon] CreateProcessW `"pwsh.exe -Command \"npx in
 ERROR [portable_pty::win::psuedocon] CreateProcessW `"pwsh.exe -Command \"npx next dev\"\0"` in cwd `Some("D:\\CODING\\PROJECTS\\n8n-clone\0")` failed: The system cannot find the file specified. (os error 2)
 ERROR [lib::error] Error: channel closed
 ERROR [lib::error] Error: channel closed
+ERROR [lib::error] Error: channel closed
+ERROR [lib::error] Error: channel closed

@@ -27,3 +27,8 @@ https://www.better-auth.com/docs/installation
 -> npx @better-auth/cli generate
 -> npx prisma migrate dev   (since we are using prisma)
 
+# For Themes and Styling (tweakcn)
+https://tweakcn.com/editor/theme
+
+# For Logos
+https://logoipsum.com/

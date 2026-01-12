@@ -66,3 +66,27 @@ package.json
     "inngest:dev": "inngest-cli dev",
     "dev:all" : "mprocs"
 ```
+
+# Choosing AI Providers (AI-SDK)
+https://ai-sdk.dev/providers/ai-sdk-providers
+
+-> npm i ai
+
+1) Choose your AI Model 
+   Gemini    -> npm install @ai-sdk/google
+   OpenAI    -> npm install @ai-sdk/openai
+   Anthropic -> npm install @ai-sdk/anthropic
+
+2) Set AI SDK 
+   gemini   -> https://ai.google.dev/
+   OpenAI   -> https://platform.openai.com/settings/organization/api-keys
+   Anthropic -> 
+
+3) use AI SDK with Inngest
+   gemini -> https://ai-sdk.dev/providers/ai-sdk-providers/google-generative-ai
+   OpenAI -> https://ai-sdk.dev/providers/ai-sdk-providers/openai
+
+```tsx
+import { google } from '@ai-sdk/google';
+import { generateText } from 'ai';
+

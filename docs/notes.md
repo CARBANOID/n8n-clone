@@ -356,6 +356,34 @@ export const requireUnauth = async() => {   // ensures that only unauthenticated
 }
 ```
 
+page.tsx (src/app/page.tsx)
+--------
+
+```tsx 
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { requireAuth } from "@/lib/auth-utils";
+import { caller } from "@/trpc/server";
+import { LogOutButton } from "./logout";
+
+const Home = async() => {
+  await requireAuth() ;  // for User Experience , the real auth check is done in trpc protected procedures
+  const data = await caller.getWorkFlows()
+  return (
+    <div className="min-h-screen min-w-screen flex items-center justify-center flex-col gap-y-6">
+      protected server component
+      <div>
+        {JSON.stringify(data,null,2)}
+      </div>
+        <LogOutButton/>
+    </div>
+  )
+}
+
+export default Home ;
+```
+
+
 # Adding Protected Procedures in TRPC
 
 init.ts (src/trpc/init.ts)
@@ -376,3 +404,90 @@ export const protectedProcedure = baseProcedure.use(async({ ctx , next}) => {
   }
   return next({ ctx : {...ctx , auth : session }}) ; 
 ```
+
+
+# .query() vs .mutation()
+
+* .query() -> Fetch/read data without changing anything
+* .mutation() -> create / update / delete data
+
+```ts
+export const appRouter = createTRPCRouter({
+  getWorkFlows : protectedProcedure.query(({ctx}) => {     
+      return pClient.workflow.findMany();
+  }), 
+  createWorkFlow : protectedProcedure.mutation(() => {    
+     return pClient.workflow.create({
+        data : {
+          name : "test-workflow"
+        }
+     })
+  }),
+});
+// export type definition of API
+export type AppRouter = typeof appRouter;
+```
+
+
+* These tanstack react query hooks are used in client component and can execute the promises
+
+-> useQuery for .query()  
+-> useMutation for .mutation()
+
+page.tsx (src/app/page.tsx)
+--------
+```tsx
+"use client" ;
+
+import { Button } from "@/components/ui/button";
+import { LogOutButton } from "./logout";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+
+const Home = () => {
+    const  trpc = useTRPC() ; 
+    const { data } = useQuery(trpc.getWorkFlows.queryOptions()) ;
+
+    const queryClient = useQueryClient() ; 
+    const create = useMutation(trpc.createWorkFlow.mutationOptions({
+      onSuccess : () => {
+        queryClient.invalidateQueries(trpc.getWorkFlows.queryOptions()) ;  // refetchs data/worklow in case of successul creation
+      }
+    })) ;
+
+  return (
+    <div className="min-h-screen min-w-screen flex items-center justify-center flex-col gap-y-6">
+      protected server component
+      <div>
+        {JSON.stringify(data,null,2)}
+      </div>
+      <Button disabled={create.isPending} onClick={ () => create.mutate() }>
+        Create workflow
+      </Button>
+
+      <LogOutButton/>
+    </div>
+  )
+}
+
+export default Home ;
+```
+
+
+# BackGround Jobs
+
+1) Invoking background job through inngest by code 
+
+* using .send() method 
+
+```tsx
+    await inngest.send({
+      name : "test/hello.world" ,    // event name 
+      data : {
+        email : "test1123gmail.com"
+      },
+    }) ;
+
+```
+
+**NOTE** : can be done manually from inngest dashboard

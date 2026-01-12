@@ -32,3 +32,37 @@ https://tweakcn.com/editor/theme
 
 # For Logos
 https://logoipsum.com/
+
+
+# Background Jobs (using Ingest)
+-> Background Jobs are required since a task may require multiple services and if one service fails we may need to retry or resume by pushing them in background queue again .
+
+https://www.inngest.com/docs/getting-started/nextjs-quick-start?ref=docs-home
+-> npm install inngest
+-> npx --ignore-scripts=false inngest-cli@latest --version
+-> npx inngest-cli@latest dev
+
+# Install mprocs 
+(for running multiple processes )
+-> npm install -D mprocs
+-> npm i -D inngest-cli
+
+mprocs.yaml
+-----------
+
+```yaml
+procs:
+  inngest:
+    cmd: ["cmd", "/c", "npm", "run", "inngest:dev"]
+  
+  next:
+    cmd: ["cmd", "/c", "npm", "run", "dev"]
+```
+
+
+package.json
+------------
+```json
+    "inngest:dev": "inngest-cli dev",
+    "dev:all" : "mprocs"
+```

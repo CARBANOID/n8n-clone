@@ -1,6 +1,7 @@
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import pClient from '@/lib/db';
 import { inngest } from '@/inngest/client';
+import { TRPCError } from '@trpc/server';
 
 
 /*

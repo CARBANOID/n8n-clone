@@ -2,7 +2,14 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  devIndicators : false , // to disable the next.js dev indicator
+  async redirects(){
+    return [{
+      source : "/" ,
+      destination : "/workflows",
+      permanent : false 
+    }] ; 
+  }
 };
 
 export default withSentryConfig(nextConfig, {

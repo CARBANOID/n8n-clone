@@ -101,3 +101,22 @@ https://none-l1o.sentry.io/issues/?referrer=onboarding-skip
    Copy the SENTRY_AUTH_TOKEN which will come in terminal while setting up sentry
 
 * Adding AI Agent (https://none-l1o.sentry.io/insights/ai-agents/?integration=vercel_ai)
+
+
+# Setting the default route to /workflows
+
+next.config.ts 
+--------------
+```tsx
+const nextConfig: NextConfig = {
+  async redirects(){
+    return [{
+      source : "/" ,
+      destination : "/workflows",
+      permanent : false 
+    }] ; 
+  }
+};
+```
+
+**NOTE** : permantent = true  -> will set the default opening route to /workflows for every nextJs project in the system 

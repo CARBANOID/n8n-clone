@@ -630,3 +630,26 @@ export const execute = inngest.createFunction(
 ```
 
 * Add logging (https://docs.sentry.io/platforms/javascript/guides/nextjs/logs/)
+
+
+# Accessing Dynamic Route Params in NextJs Server Component
+
+page.tsx (src/app/(dashboard)/(rest)/credentials/[credentialId]/page.tsx)
+--------
+
+```tsx
+interface pageProps {
+    params : Promise<{ credentialId: string }>;  // credentailId should be the name cause we want access that param 
+}
+
+const Page = async({ params }: pageProps) => {
+    const { credentialId } = await params;
+    return (
+        <div>
+            Credentials Id : {credentialId}
+        </div>
+    ); 
+}
+
+export default Page;
+```

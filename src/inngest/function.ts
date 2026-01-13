@@ -22,7 +22,7 @@ export const execute = inngest.createFunction(
         }
       ) ; 
 
-      Sentry.logger.warn("Rate limit approaching", { current: 95, max: 100 });
+      Sentry.logger.info("Rate limit approaching");
       
       const {steps : openaiSteps} = await step.ai.wrap("openai-generate-text", 
         generateText , {

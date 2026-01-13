@@ -8,7 +8,10 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: "https://4826807a00bcb4d7d984e794bcde509c@o4510702096089088.ingest.de.sentry.io/4510702120075344",
  
-  integrations: [Sentry.vercelAIIntegration()],
+  integrations: [
+    Sentry.vercelAIIntegration(),
+    Sentry.consoleLoggingIntegration({levels : ["log","error","warn"]})
+  ],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,

@@ -537,3 +537,96 @@ export const execute = inngest.createFunction(
   },
 );  
 ```
+
+
+# Error Tracking with Sentry in NextJs
+
+* AI Montoring with Sentry using Vercel AI SDK integration (https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/integrations/vercelai/)
+
+sentry.server.config.ts
+-----------------------
+```tsx
+import * as Sentry from "@sentry/nextjs";
+Sentry.init({
+  dsn: "https://4826807a00bcb4d7d984e794bcde509c@o4510702096089088.ingest.de.sentry.io/4510702120075344",
+  integrations: [
+    Sentry.vercelAIIntegration({
+      recordInputs: true,
+      recordOutputs: true,
+    }),
+  ],
+  tracesSampleRate: 1,
+  enableLogs: true,
+  sendDefaultPii: true,
+});
+```
+
+-> Add this to the generated Text
+```tsx
+experimental_telemetry : {
+  isEnabled: true,
+  recordInputs: true,
+  recordOutputs: true,
+}
+```
+
+function.ts
+-----------
+```tsx
+import { inngest } from "./client";
+import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from "@ai-sdk/anthropic";
+import { generateText } from 'ai';
+
+export const execute = inngest.createFunction(
+  { id: "math" },
+  { event: "testAI/sum" },
+  async ({ event, step }) => {
+      const {steps : geminiSteps} = await step.ai.wrap("gemini-generate-text", 
+        generateText , {
+          model : google("gemini-2.5-flash") , 
+          system : "You are an helpful assistant" , 
+          prompt : "What is 2 + 2 ?",
+          experimental_telemetry : {
+            isEnabled: true,
+            recordInputs: true,
+            recordOutputs: true,
+          },  
+        }
+      ) ; 
+
+      
+      const {steps : openaiSteps} = await step.ai.wrap("openai-generate-text", 
+        generateText , {
+          model : openai("gpt-5") , 
+          system : "You are an helpful assistant" , 
+          prompt : "What is 2 + 2 ?",
+          experimental_telemetry : {
+            isEnabled: true,
+            recordInputs: true,
+            recordOutputs: true,
+          },
+        }
+      ) ; 
+
+      const {steps : anthropicSteps} = await step.ai.wrap("anthropic-generate-text", 
+        generateText , {
+          model : anthropic("claude-sonnet-4-5") , 
+          system : "You are an helpful assistant" , 
+          prompt : "What is 2 + 2 ?",
+          experimental_telemetry : {
+            isEnabled: true,
+            recordInputs: true,
+            recordOutputs: true,
+          },
+        }
+      ) ; 
+      
+      return { geminiSteps , openaiSteps , anthropicSteps}  ;
+
+  },
+);  
+```
+
+* Add logging (https://docs.sentry.io/platforms/javascript/guides/nextjs/logs/)

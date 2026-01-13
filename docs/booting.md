@@ -86,7 +86,18 @@ https://ai-sdk.dev/providers/ai-sdk-providers
    gemini -> https://ai-sdk.dev/providers/ai-sdk-providers/google-generative-ai
    OpenAI -> https://ai-sdk.dev/providers/ai-sdk-providers/openai
 
-```tsx
-import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
 
+# Error Tracking (Sentry)
+does 
+-> session replays (how UI looked when error occured)
+-> logs 
+-> AI monitoring
+
+https://cwa.run/sentry
+https://none-l1o.sentry.io/issues/?referrer=onboarding-skip
+
+-> npx @sentry/wizard@latest -i nextjs
+   select Sentry Saas (sentry.io) option
+   Copy the SENTRY_AUTH_TOKEN which will come in terminal while setting up sentry
+
+* Adding AI Agent (https://none-l1o.sentry.io/insights/ai-agents/?integration=vercel_ai)

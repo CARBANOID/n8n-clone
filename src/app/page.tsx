@@ -15,11 +15,14 @@ const Home = () => {
       onSuccess : () => {
         toast.success("Job Queued") ;  // refetchs data/worklow in case of successul creation
       }
-    })) ;
+    })) ; 
 
     const testAI = useMutation(trpc.testAI.mutationOptions({
       onSuccess : () => {
         toast.success("AI Job Queued") ;  // refetchs data/worklow in case of successul creation
+      },
+      onError : (error) => {
+        toast.error(`Error : ${error.message}`) ;
       }
     })) ; 
 

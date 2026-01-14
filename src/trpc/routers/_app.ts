@@ -1,4 +1,4 @@
-import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
+import { baseProcedure, createTRPCRouter, premiumProcedure, protectedProcedure } from '../init';
 import pClient from '@/lib/db';
 import { inngest } from '@/inngest/client';
 import { TRPCError } from '@trpc/server';
@@ -16,7 +16,7 @@ in trpc we call the procedure directly as a function
 */
 
 export const appRouter = createTRPCRouter({
-  testAI : baseProcedure.mutation(async() =>{
+  testAI : premiumProcedure.mutation(async() =>{
     await inngest.send({
       name : "testAI/sum" ,
     }) ;

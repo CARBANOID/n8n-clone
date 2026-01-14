@@ -25,6 +25,7 @@ import {
     SidebarMenuItem
 } from "@/components/ui/sidebar" ;
 import { authClient } from "@/lib/auth-client";
+import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscriptions";
 
 
 const menuItems = [
@@ -53,7 +54,8 @@ const menuItems = [
 export const AppSideBar = () => {
     const router = useRouter() ; 
     const pathname = usePathname() ; 
-    
+    const { hasActiveSubscriptions , isLoading } = useHasActiveSubscription() ;
+
     return (
         <Sidebar collapsible="icon"> 
             <SidebarHeader>
@@ -103,21 +105,24 @@ export const AppSideBar = () => {
                 }
             </SidebarContent>
             <SidebarFooter>
+                { 
+                !hasActiveSubscriptions && !isLoading &&  // remove this button if user has pro tier already
                 <SidebarMenuItem>
                     <SidebarMenuButton 
                      tooltip="upgrade to pro"
                      className="gap-x-4 h-10 p-4"
-                     onClick={() => {}}
+                     onClick={() => { authClient.checkout( {slug : "pro"} )}}   // to add pro tier thorugh polar
                     >
                         <StarIcon className="h-4 w-4"/>
                         <span>Upgrade to Pro</span>
                     </SidebarMenuButton>
-                </SidebarMenuItem>
+                </SidebarMenuItem> 
+                }
                 <SidebarMenuItem>
                     <SidebarMenuButton 
                      tooltip="Billing Portal"
                      className="gap-x-4 h-10 p-4"
-                     onClick={() => {}}
+                     onClick={() => authClient.customer.portal() }  // to add the polar billing portal
                     >
                         <CreditCardIcon className="h-4 w-4"/>
                         <span>Billing Portal</span>

@@ -120,3 +120,23 @@ const nextConfig: NextConfig = {
 ```
 
 **NOTE** : permantent = true  -> will set the default opening route to /workflows for every nextJs project in the system 
+
+
+# Payment (Polar)  
+http://sandbox.polar.sh/dashboard/n8n-clone-devlopment-sonu/onboarding/integrate?productId=4fb9810c-92e4-4cae-99bf-c1b04302a462
+
+**Do the devlopment in sandbox mode always**
+
+-> npm install @polar-sh/better-auth @polar-sh/sdk
+
+* create 2 organizations : 
+1) for production 
+2) another through sandbox dashboard for testing payments
+
+* select the betterAuth Intergration and follow the steps
+
+-> npx prisma migrate reset  (because we introducted createCustomerOnSignUp field in betterAuth config file i.e src/lib/auth.ts )
+
+*createCustomerOnSignUp* -> this field creates a customer in polar dashboard whenever a user signs up in our app
+
+**POLAR is much easier to setup compared to stripe**

@@ -653,3 +653,172 @@ const Page = async({ params }: pageProps) => {
 
 export default Page;
 ```
+
+# How to setup Payments using Polar with Better-Auth
+
+1) create polarClient 
+
+polar.ts (src/lib/polar.ts)
+--------
+```ts
+import { Polar } from "@polar-sh/sdk" ; 
+
+export const polarClient = new Polar({
+    accessToken : process.env.POLAR_ACCESS_TOKEN ,
+    server : (process.env.NODE_ENV !== "production") ? "sandbox" : "production" // TODO : change in production
+}) ;
+```
+
+2) Add polar plugin to better-auth
+
+
+auth.ts (src/lib/auth.ts)
+--------
+
+```ts
+import { checkout , polar , portal } from "@polar-sh/better-auth";
+import { betterAuth, check } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import   pClient from "./db";
+import { polarClient } from "./polar";
+
+export const auth = betterAuth({
+    database: prismaAdapter(pClient, {
+        provider: "postgresql", // or "mysql", "postgresql", ...etc
+    }),
+    emailAndPassword : {
+        enabled: true , 
+        autoSignIn : true , // automatically sign in users after user register/sign up
+    },
+    plugins : [
+        polar({
+            client: polarClient,
+            createCustomerOnSignUp: true,   // this field creates a customer in polar dashboard whenever a user signs up in our app
+            use: [
+                checkout({
+                    products: [
+                        {
+                            productId: "xyz",
+                            slug: "pro" // Custom slug for easy reference in Checkout URL, e.g. /checkout/n8n-clone-dev 
+                                        // slug is like a nickname of product
+                        }
+                    ],
+                    successUrl: process.env.POLAR_SUCCESS_URL,
+                    authenticatedUsersOnly: true
+                }),
+                portal() 
+            ],
+        })
+    ]
+});
+```
+
+**createCustomerOnSignUp** -> this field creates a customer in polar dashboard whenever a user signs up in our app
+
+
+auth-client.ts (src/lib/auth-client.ts)
+--------------
+
+```ts
+import { polarClient } from "@polar-sh/better-auth"
+import { createAuthClient } from "better-auth/react"
+export const authClient = createAuthClient({
+    plugins : [polarClient()] ,
+})
+```
+
+* Now the user will be created automatically in polar when they sign up
+
+3) How to upgrade to *Pro* tier using polar ?  
+
+* Add this in 
+app-sidebar.tsx (src/components/app-sidebar.tsx)
+---------------
+
+```tsx
+  onClick={() => { authClient.checkout( {slug : "pro"} )}}   // to add pro tier thorugh polar
+```
+
+* This will lead the user to polar payment screen 
+
+**NOTE** : 
+*You can also allow trail period for pro tier from polar dashboard while or after creating the product by going to product -> edit product -> enable trial period*
+
+
+4) Testing Payments
+**If you want to test payement then you can use stripe test cards**
+
+Stripe Test Card no : 4242 4242 4242 4242
+Expiration : Any future date
+CVC : any 3 digits code 
+contry : any valid country
+
+
+5) To know the subscription tier *(base or pro tier)* of user
+
+// this function will give subscription state of user i.e base or pro tier
+* const { data } = await authClient.customer.state() ;   
+
+
+use-subscription.ts (src/features/subscriptions/hooks/use-subscriptions.ts)
+-------------------
+```ts
+import { useQuery } from '@tanstack/react-query';
+import { authClient } from '@/lib/auth-client' ;
+
+export const useSubscriptions = () => {
+    return useQuery({
+        queryKey : ['subscriptions'] ,
+        queryFn  : async() => {
+            const { data } = await authClient.customer.state() ;  // will give subscription state of user i.e base or pro tier
+            return data ;  
+        } 
+    })
+}
+
+
+export const useHasActiveSubscription = () => {
+    const { data : customerState , isLoading  , ...rest} = useSubscriptions() ; 
+    console.log(customerState) ; 
+    const hasActiveSubscriptions = customerState?.activeSubscriptions && customerState.activeSubscriptions.length > 0  // user can have more than one active subscription
+
+    return {
+        hasActiveSubscriptions ,
+        subscription : customerState?.activeSubscriptions?.[0],
+        isLoading,
+        ...rest
+    } 
+}
+```
+
+6) To add the polar billing portal
+* Add this in 
+app-sidebar.tsx (src/components/app-sidebar.tsx)
+---------------
+```tsx
+  onClick={() => authClient.customer.portal() }  // to add the polar billing portal
+```
+
+7) Creating a premium procedure in TRPC
+
+init.ts (src/trpc/init.ts)
+-------
+```ts 
+import { auth } from '@/lib/auth';
+import { polarClient } from '@/lib/polar';
+import { TRPCError } from '@trpc/server';
+
+export const premiumProcedure = protectedProcedure.use(async({ctx , next}) => {
+  const customer = await polarClient.customers.getStateExternal({
+    externalId : ctx.auth.user.id
+  })
+
+  if(!customer.activeSubscriptions || customer.activeSubscriptions.length === 0){
+    throw new TRPCError({
+    code : "FORBIDDEN",
+    message : "Active subscription required"
+    })
+  }
+  return next({ ctx : { ...ctx , customer }}) ;
+})
+```

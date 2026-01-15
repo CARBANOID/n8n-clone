@@ -1,7 +1,5 @@
-import { baseProcedure, createTRPCRouter, premiumProcedure, protectedProcedure } from '../init';
-import pClient from '@/lib/db';
-import { inngest } from '@/inngest/client';
-import { TRPCError } from '@trpc/server';
+import { createTRPCRouter } from '../init';
+import { workflowsRouter } from '@/features/workflows/servers/router';
 
 
 /*
@@ -16,33 +14,8 @@ in trpc we call the procedure directly as a function
 */
 
 export const appRouter = createTRPCRouter({
-  testAI : premiumProcedure.mutation(async() =>{
-    await inngest.send({
-      name : "testAI/sum" ,
-    }) ;
+  workflows : workflowsRouter , 
 
-    return { success : true , message : "Job Queued"}
-  }),
-  getWorkFlows : protectedProcedure.query(({ctx}) => {       // .query -> Fetch/read data without changing anything
-
-      return pClient.workflow.findMany();
-  }), 
-  createWorkFlow : protectedProcedure.mutation(async() => {     // .mutation -> create / update / delete data
-
-    // invoking background job through inngest
-    await inngest.send({
-      name : "test/hello.world" ,
-      data : {
-        email : "test1123gmail.com"
-      },
-    }) ;
-
-     return pClient.workflow.create({
-        data : {
-          name : "test-workflow"
-        }
-     })
-  }), 
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

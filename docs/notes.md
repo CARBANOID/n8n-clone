@@ -25,7 +25,7 @@ export  function Home2(){
 ```
 
 
-## Using TRPC in NextJs
+## Using TRPC in NextJs (https://trpc.io/docs/client/tanstack-react-query/server-components)
 
 # Adding TRPC in layout.tsx
 ```tsx
@@ -105,6 +105,42 @@ userById: baseProcedure
 
 // Client
 const data = await trpc.userById.query({ id: '123' }); // ✅ Fully typed!
+
+```
+
+# How to create Procedures in TRPC using TRPC router
+
+```tsx
+import { createTRPCRouter } from "@/trpc/init";
+export const workflowsRouter = createTRPCRouter({
+// define procedures here
+  getWorkFlows : protectedProcedure.query(({ctx}) => {   
+      return pClient.workflow.findMany();
+  }), 
+}) ;
+```
+
+Example 
+------
+```ts
+import pClient from "@/lib/db";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { z } from "zod";
+
+export const workflowsRouter = createTRPCRouter({
+    remove : protectedProcedure
+        .input(z.object({    // expected request body 
+            id : z.string()
+        }))
+        .mutation(async( { ctx , input }) =>{  // accessing the request body through input
+        return pClient.workflow.delete({
+            where : {
+                id : input.id ,
+                userId : ctx.auth.user.id 
+            }
+        })
+    })
+}) ;
 
 ```
 

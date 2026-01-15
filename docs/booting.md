@@ -140,3 +140,10 @@ http://sandbox.polar.sh/dashboard/n8n-clone-devlopment-sonu/onboarding/integrate
 *createCustomerOnSignUp* -> this field creates a customer in polar dashboard whenever a user signs up in our app
 
 **POLAR is much easier to setup compared to stripe**
+
+
+# To get random slugs
+-> npm install random-word-slugs
+
+# Adding react Error Boundary
+-> npm i react-error-boundary

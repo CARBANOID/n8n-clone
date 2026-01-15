@@ -1,0 +1,45 @@
+"use client" ; 
+
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogAction,
+    AlertDialogDescription,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogHeader,
+    AlertDialogFooter,
+} from "@/components/ui/alert-dialog" ;
+
+import { authClient } from "@/lib/auth-client";
+
+interface UpgradeModalProps {
+    open : boolean ;
+    onOpenChange : (open : boolean) => void ;
+}
+
+export const UpgradeModal = ( {
+    open,
+    onOpenChange 
+} : UpgradeModalProps) =>{
+    return (
+        <AlertDialog open={open} onOpenChange={onOpenChange}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Upgrade To Pro</AlertDialogTitle>
+                     <AlertDialogDescription>
+                        Upgrade to the Pro plan to unlock all features
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={() => authClient.checkout({ slug : "pro"})}
+                    >
+                        Upgrade Now
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    )
+}

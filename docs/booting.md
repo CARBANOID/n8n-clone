@@ -147,3 +147,9 @@ http://sandbox.polar.sh/dashboard/n8n-clone-devlopment-sonu/onboarding/integrate
 
 # Adding react Error Boundary
 -> npm i react-error-boundary
+
+
+# Add NUQS for param handling 
+* store the params in the url and retrieving them using NUQS package
+-> npm install nuqs
+https://nuqs.dev/docs/adapters#nextjs-app-router

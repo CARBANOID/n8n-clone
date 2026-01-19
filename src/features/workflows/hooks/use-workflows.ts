@@ -23,11 +23,38 @@ export const useCreateWorkflow = () => {
 
     return useMutation(trpc.workflows.create.mutationOptions({
         onSuccess : (data) =>{
-            toast.success(`workflow ${data.name} created`) ;
-            queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
+            toast.success(`workflow "${data.name}" created`) ;
+            // queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
+
+            // better method to invalidate only the created workflow
+            queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({ 
+                id : data.id
+            })) ; 
         },
         onError : (error) =>{
             toast.error(`Failed to create workflow: ${error.message}`) ;
+        }
+    })) ;
+}
+
+/**
+ *  Hook to remove a workflow
+*/
+
+export const useRemoveWorkflow = () => {
+    const trpc = useTRPC() ; 
+    const queryClient = useQueryClient() ;
+
+    return useMutation(trpc.workflows.remove.mutationOptions({
+        onSuccess : (data) =>{
+            toast.success(`workflow "${data.name}" removed`) ;
+            // better method to invalidate only the  removed workflow and the list
+            queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({ 
+                id : data.id
+            })) ; // invalidates the current data so that new one gets loaded
+        }, 
+        onError : (error) =>{
+            toast.error(`Failed to remove workflow: ${error.message}`) ;
         }
     })) ;
 }

@@ -153,3 +153,13 @@ http://sandbox.polar.sh/dashboard/n8n-clone-devlopment-sonu/onboarding/integrate
 * store the params in the url and retrieving them using NUQS package
 -> npm install nuqs
 https://nuqs.dev/docs/adapters#nextjs-app-router
+
+# Adding superjson for handling complex data types b/w trpc ,database and frontend 
+-> npm install superjson
+
+* Note : our js date type present in frontend are not present in the postgres database and vice versa. So we use superjson to convert these complex data types to normal data types which can be stored in the database and can be used in the frontend without any issues
+
+
+* add superjson transformer in init.ts , query-client.ts and client.tsx
+
+-> npm i date-fns

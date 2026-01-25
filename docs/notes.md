@@ -226,6 +226,9 @@ export default async function Home(){
 
 3) **PREFERRED METHOD** :  Creating Boundary between Server and Client Component
 
+* using prefetch() in server component to prefetch the data
+* using useSuspenseQuery() in client component to use the prefetched data
+
 page.tsx
 --------
 
@@ -967,4 +970,92 @@ page   : number
         onSearchChange : setLocalSearch
     }
 } 
+```
+
+
+# OnBlur property of Input Tag
+
+-> onBlur fires when the input loses focus, which happens when you click outside the input box (or tab away from it) .
+* i.e if you click outside the input box onBlur get triggered
+
+editor-header.tsx (src/features/editor/components/editor-header.tsx)
+-----------------
+
+```tsx
+export const EditorNameInput = ( { workflowId } : { workflowId: string } ) =>{
+    const { data : workflow } = useSuspenseWorkflow(workflowId) ;
+    const updateWorkflow = useUpdateWorkflowName() ; 
+
+    const [isEditing, setIsEditing] = useState(false) ;
+    const [name, setName] = useState(workflow.name) ;
+
+    const inputRef = useRef<HTMLInputElement>(null) ;
+
+    useEffect(() =>{
+        if(workflow.name){
+            setName(workflow.name) ;
+        }
+    },[workflow.name]) ;
+
+    useEffect(() =>{
+        if(isEditing && inputRef.current){
+            inputRef.current.focus() ;
+            inputRef.current.select() ;
+        }
+    },[isEditing]) ;
+
+    const handleSave = async() =>{
+        if(name == workflow.name){
+            setIsEditing(false) ;
+            return ;
+        }
+
+        try{
+            await updateWorkflow.mutateAsync({
+                id : workflowId,
+                name : name
+            }) ;
+        }
+        catch{
+            setName(workflow.name) ;
+        }
+        finally{
+            setIsEditing(false) ;
+        }
+    }
+
+    const handleKeyDown = (e : React.KeyboardEvent) =>{
+        if(e.key === "Enter"){
+            handleSave() ;
+        }
+        else if(e.key === "Escape"){
+            setName(workflow.name) ;
+            setIsEditing(false) ;
+        }
+    }
+
+    if(isEditing){
+        return (
+            <Input
+                ref={inputRef}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={handleSave}
+                onKeyDown={handleKeyDown}
+                className="h-7 w-auto min-w-[100px] px-2"
+            >
+
+            </Input>
+        )
+    }
+
+    return (
+        <BreadcrumbItem 
+            onClick={() => setIsEditing(true)}
+            className="cursor-pointer hover:text-foreground transition-colors"
+        >
+            {workflow.name}
+        </BreadcrumbItem>
+    )
+}
 ```

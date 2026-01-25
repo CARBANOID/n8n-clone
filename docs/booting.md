@@ -163,3 +163,7 @@ https://nuqs.dev/docs/adapters#nextjs-app-router
 * add superjson transformer in init.ts , query-client.ts and client.tsx
 
 -> npm i date-fns
+
+
+# Biome 
+-> To use biome install biome extension in vscode 

@@ -1,11 +1,11 @@
-/**
- * Hook to fetch all workflows using suspense
- */
-
 import { useTRPC } from "@/trpc/client"
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useWorkflowsParams } from "./use-workflows-params";
+
+/**
+ * Hook to fetch all workflows using suspense
+*/
 
 export const useSuspenseWorkflows = () => {
     const trpc = useTRPC() ; 
@@ -14,7 +14,7 @@ export const useSuspenseWorkflows = () => {
 }
 
 /**
- * Hook to create a workflows using suspense
+ * Hook to create a workflow
 */
 
 export const useCreateWorkflow = () => {
@@ -24,12 +24,7 @@ export const useCreateWorkflow = () => {
     return useMutation(trpc.workflows.create.mutationOptions({
         onSuccess : (data) =>{
             toast.success(`workflow "${data.name}" created`) ;
-            // queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
-
-            // better method to invalidate only the created workflow
-            queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({ 
-                id : data.id
-            })) ; 
+            queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
         },
         onError : (error) =>{
             toast.error(`Failed to create workflow: ${error.message}`) ;
@@ -48,13 +43,46 @@ export const useRemoveWorkflow = () => {
     return useMutation(trpc.workflows.remove.mutationOptions({
         onSuccess : (data) =>{
             toast.success(`workflow "${data.name}" removed`) ;
+            queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
+
             // better method to invalidate only the  removed workflow and the list
-            queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({ 
-                id : data.id
-            })) ; // invalidates the current data so that new one gets loaded
+            // this do not bring change s in the frontend
+            // queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({ 
+            //     id : data.id
+            // })) ;
         }, 
         onError : (error) =>{
             toast.error(`Failed to remove workflow: ${error.message}`) ;
         }
+    })) ;
+}
+
+/**
+ * Hook to fetch a workflows using suspense
+*/
+
+export const useSuspenseWorkflow = (id : string) => {
+    const trpc = useTRPC() ; 
+    return useSuspenseQuery(trpc.workflows.getOne.queryOptions({id})) ;
+}
+
+
+/**
+ * Hook to update a workflow name
+*/
+
+export const useUpdateWorkflowName = () => {
+    const trpc = useTRPC() ; 
+    const queryClient = useQueryClient() ;
+
+    return useMutation(trpc.workflows.updateName.mutationOptions({
+        onSuccess : (data) =>{
+            toast.success(`workflow "${data.name}" updated`) ;
+            queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({})) ; // invalidates the current data so that new one gets loaded
+            queryClient.invalidateQueries(trpc.workflows.getOne.queryOptions({ id : data.id})) ; // invalidates the current data so that new one gets loaded
+        },
+        onError : (error) =>{
+            toast.error(`Failed to update workflow: ${error.message}`) ;
+        } 
     })) ;
 }

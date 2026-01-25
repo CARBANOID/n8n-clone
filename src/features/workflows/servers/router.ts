@@ -5,7 +5,7 @@ import { z } from "zod";
 import { PAGINATION } from "@/config/constants";
 
 export const workflowsRouter = createTRPCRouter({
-    create : premiumProcedure.mutation(async( { ctx }) =>{
+    create : premiumProcedure.mutation(async({ ctx }) =>{
         return pClient.workflow.create({
             data : {
                 name   : generateSlug(3),
@@ -17,7 +17,7 @@ export const workflowsRouter = createTRPCRouter({
         .input(z.object({
             id : z.string()
         }))
-        .mutation(async( { ctx , input }) =>{
+        .mutation(async({ ctx , input }) =>{
         return pClient.workflow.delete({
             where : {
                 id : input.id ,
@@ -30,7 +30,7 @@ export const workflowsRouter = createTRPCRouter({
             id : z.string() , 
             name : z.string().min(1)
         }))
-        .mutation(async( { ctx , input }) =>{
+        .mutation(async({ ctx , input }) =>{
         return pClient.workflow.update({
             where : {
                 id : input.id ,
@@ -45,8 +45,8 @@ export const workflowsRouter = createTRPCRouter({
         .input(z.object({
             id : z.string()
         }))
-        .query(async( { ctx , input }) =>{
-        return pClient.workflow.findUnique({
+        .query(async({ ctx , input }) =>{
+        return pClient.workflow.findUniqueOrThrow({
             where : {
                 id : input.id ,
                 userId : ctx.auth.user.id

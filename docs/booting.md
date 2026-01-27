@@ -167,3 +167,10 @@ https://nuqs.dev/docs/adapters#nextjs-app-router
 
 # Biome 
 -> To use biome install biome extension in vscode 
+
+# react-flow
+-> npm install @xyflow/react
+https://reactflow.dev/learn
+  
+* Adding shadcn components for reactflow nodes (https://reactflow.dev/ui/components)
+-> npx shadcn@3.3.1 add https://ui.reactflow.dev/placeholder-node

@@ -14,7 +14,7 @@ export const useSubscriptions = () => {
 
 export const useHasActiveSubscription = () => {
     const { data : customerState , isLoading  , ...rest} = useSubscriptions() ; 
-    console.log(customerState) ; 
+    // console.log(customerState) ; 
     const hasActiveSubscriptions = customerState?.activeSubscriptions && customerState.activeSubscriptions.length > 0  // user can have more than one active subscription
     
     return {

@@ -173,4 +173,13 @@ https://nuqs.dev/docs/adapters#nextjs-app-router
 https://reactflow.dev/learn
   
 * Adding shadcn components for reactflow nodes (https://reactflow.dev/ui/components)
+
+* To add placeholder node component
 -> npx shadcn@3.3.1 add https://ui.reactflow.dev/placeholder-node
+
+* To add base handle component
+-> npx shadcn@3.3.1 add https://ui.reactflow.dev/base-handle
+
+
+# To create cuids cause we use them in prisma
+npm install @paralleldrive/cuid2

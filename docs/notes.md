@@ -1059,3 +1059,138 @@ export const EditorNameInput = ( { workflowId } : { workflowId: string } ) =>{
     )
 }
 ```
+
+# Using Jotia 
+[https://jotai.org/docs/guides/nextjs]
+
+-> creating an atom to store editor state 
+
+atoms.ts (src/features/editor/store/atoms.ts)
+--------
+```tsx
+import type { ReactFlowInstance } from "@xyflow/react";
+import { atom } from "jotai";
+
+export const editorAtom = atom<ReactFlowInstance | null>(null) ;
+```
+
+-> add Provider in layout.tsx
+
+layout.tsx (src/app/layout.tsx)
+----------
+```tsx
+/* ------ something --------*/
+import { Provider } from "jotai";
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} >
+        <TRPCReactProvider>
+          <NuqsAdapter>
+          <Provider>
+            {children}
+            <Toaster/>
+          </Provider>
+          </NuqsAdapter> 
+        </TRPCReactProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+-> Create a Editor Instance (setEditor) in editor.tsx using 
+  * useSetAtom hook and editorAtom 
+  * pass setEditor to onInit of ReactFlow Component
+
+editor.tsx
+----------
+
+```tsx
+"use client"
+
+/* ------ something --------*/
+
+import { useSetAtom } from "jotai";
+import { editorAtom } from "../store/atoms";
+
+/* ------ something --------*/
+
+
+export const Editor = ( { workflowId } : { workflowId : string }) => {
+
+    /* ------ something --------*/
+
+    const setEditor = useSetAtom(editorAtom) ;
+
+    /* ------ something --------*/
+
+ 
+    return (
+    <div className="size-full">
+      <ReactFlow
+        /* ------ something --------*/
+        onInit={setEditor}
+      > 
+        <Background/> {/* To add grids in the background */}
+        <Controls/>   {/* To add zoom in and out with lock functionality*/}
+        <MiniMap/>   {/* To create a mini map of the flow */}
+      
+        <Panel position="top-right">
+            {/* To add an custom panel to react flow canvas */}
+            <AddNodeButton/>
+        </Panel>
+      </ReactFlow>  
+    </div>
+    )
+}
+```
+
+-> Extracting the editor state using 
+   * useAtomValue()  hook
+
+editor-header.tsx (src/features/editor/components/editor-header.tsx)
+-----------------
+```tsx
+"use client"
+
+/* ------ something --------*/
+
+import { Button } from "@/components/ui/button"
+import { useSuspenseWorkflow, useUpdateWorkflow, useUpdateWorkflowName } from "@/features/workflows/hooks/use-workflows"
+import { useAtomValue } from "jotai"
+import { editorAtom } from "../store/atoms"
+
+export const EditorSaveButton = ( { workflowId } : { workflowId: string } ) => {
+    const editor = useAtomValue(editorAtom) ;
+    const saveWorkflow = useUpdateWorkflow() ;
+
+    const handleSave = () => {
+        if(!editor) return ;
+
+        const nodes = editor.getNodes() ;
+        const edges = editor.getEdges() ; 
+
+        saveWorkflow.mutate({
+            id : workflowId ,
+            nodes ,
+            edges 
+        })
+    }
+
+    return(
+        <div className="ml-auto">
+            <Button onClick={handleSave} disabled={saveWorkflow.isPending}>
+                <SaveIcon className="size-4"/>
+                Save
+            </Button>
+        </div>
+    )
+}
+
+```

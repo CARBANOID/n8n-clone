@@ -171,7 +171,8 @@ https://nuqs.dev/docs/adapters#nextjs-app-router
 # react-flow
 -> npm install @xyflow/react
 https://reactflow.dev/learn
-  
+
+# react-flow ui components  
 * Adding shadcn components for reactflow nodes (https://reactflow.dev/ui/components)
 
 * To add placeholder node component
@@ -180,6 +181,14 @@ https://reactflow.dev/learn
 * To add base handle component
 -> npx shadcn@3.3.1 add https://ui.reactflow.dev/base-handle
 
+* To add an status indicator component
+-> npx shadcn@3.3.1 add https://ui.reactflow.dev/node-status-indicator
 
 # To create cuids cause we use them in prisma
 npm install @paralleldrive/cuid2
+
+
+# Jotia  ( State Management Library )
+https://jotai.org/docs/guides/nextjs
+
+-> npm install jotai

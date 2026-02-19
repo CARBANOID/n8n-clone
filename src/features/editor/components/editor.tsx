@@ -1,7 +1,7 @@
 "use client"
 import { ErrorView, LoadingView } from "@/components/entity-components"
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows"
-import { useState , useCallback } from "react"
+import { useState , useCallback, useMemo } from "react"
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge,Background, Controls, MiniMap , Panel } from '@xyflow/react';
 import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -9,6 +9,8 @@ import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "@/components/add-node-button";
 import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
+import { NodeType } from "@prisma/client";
+import { ExecuteWorkflowButton } from "./execute-worklfow-button";
 
 export const EditorLoading = () => {
    return <LoadingView message="Loading editor..."/>
@@ -39,6 +41,10 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
         [],
     );
  
+    const hasManualTrigger = useMemo(() => {
+        return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER) ;
+    },[nodes])
+
     return (
     <div className="size-full">
       <ReactFlow
@@ -67,6 +73,13 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
             {/* To add an custom panel to react flow canvas */}
             <AddNodeButton/>
         </Panel>
+        {
+            hasManualTrigger 
+            &&
+            <Panel position="bottom-center">
+                <ExecuteWorkflowButton workflowId={workflowId}/>
+            </Panel>
+        }
       </ReactFlow>  
     </div>
     )

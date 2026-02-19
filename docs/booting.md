@@ -192,3 +192,11 @@ npm install @paralleldrive/cuid2
 https://jotai.org/docs/guides/nextjs
 
 -> npm install jotai
+
+# For TopoLogical Sort
+-> npm i toposort
+
+# For Fetch Request
+-> npm i ky
+
+* can use axios also

@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
 const formSchema = z.object({
-    endPoint : z.url({message : "Invalid URL"}),
+    endpoint : z.url({message : "Invalid URL"}),
     method : z.enum(['GET' , 'POST' , 'PUT' , 'DELETE' , 'PATCH']),
     body :  z.
             string(). 
@@ -42,44 +42,38 @@ const formSchema = z.object({
             // .refine()  TODO JSONS
 }) ;
 
-export type FormType = z.infer<typeof formSchema> ;
+export type HttpRequestFormValues = z.infer<typeof formSchema> ;
 
 interface HttpRequestNodeDialogProps{
     open : boolean,
     onOpenChange : (open : boolean) => void
     onSubmit : (values : z.infer<typeof formSchema>) => void ;
-    defaultEndPoint? : string ;
-    defaultMethod? : 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' ;
-    defaultBody? : string ;
+    defaultValues? : Partial<HttpRequestFormValues>
 }
 
 export const HttpRequestDialog = ({ 
     open , 
     onOpenChange ,
     onSubmit ,
-    defaultEndPoint="" ,
-    defaultMethod="GET" ,
-    defaultBody=""
+    defaultValues = {}
 } : HttpRequestNodeDialogProps) => {
+
+    const defaultHttpFormValues = {
+        endpoint : defaultValues.endpoint || "",
+        method : defaultValues.method || "GET",
+        body : defaultValues.body || ""
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver : zodResolver(formSchema) ,
-        defaultValues : {
-            method : defaultMethod ,
-            endPoint : defaultEndPoint ,
-            body : defaultBody
-        }
+        defaultValues : defaultHttpFormValues
     })
 
     useEffect(() =>{
         if(open){
-            form.reset({
-                method : defaultMethod ,
-                endPoint : defaultEndPoint ,
-                body : defaultBody
-            }) ;
+            form.reset(defaultHttpFormValues) ;
         }
-    },[open, defaultEndPoint, defaultMethod, defaultBody, form]) ;
+    },[open, defaultValues , form]) ;
 
     const watchMethod = form.watch("method") ; // watches the method field to conditionally show body field
     const showBodyField = ["POST" , "PUT" , "PATCH"].includes(watchMethod) ;
@@ -139,7 +133,7 @@ export const HttpRequestDialog = ({
 
                             <FormField
                                 control={form.control}
-                                name="endPoint"
+                                name="endpoint"
                                 render={({field}) =>(
                                     <FormItem>
                                         <FormLabel> Endpoint URL </FormLabel>

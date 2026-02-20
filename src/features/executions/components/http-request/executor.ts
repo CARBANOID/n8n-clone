@@ -2,8 +2,10 @@ import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
 import ky from "ky";
 import type { Options as KyOptions } from "ky";
+import { Variable } from "lucide-react";
 
 type HttpRequestData = {
+    variableName? : string,
     endpoint? : string ,
     method? : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
     body? : string
@@ -23,6 +25,11 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
         throw new NonRetriableError("HTTP Request node : No endpoint configured") ;
     }
 
+    if(!data.variableName){
+        // TODO : Publish "error" state for http request
+        throw new NonRetriableError("Variable name not configured") ;
+    }
+
     const result = await step.run("http-request",async() => {
         const method = data.method || "GET" ;
         const endpoint = data.endpoint! ;
@@ -30,6 +37,9 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
 
         if(["POST","PUT","PATCH"].includes(method)){
             options.body = data.body ;
+            options.headers = {
+                "Content-Type" : "application/json"
+            };
         }
 
         const response = await ky(endpoint,options) ;
@@ -38,14 +48,25 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
                             ? await response.json() 
                             : await response.text()  ;
 
-        return {
-            ...context,
+        const responsePayload = {
             httpResponse : {
                 status : response.status,
                 statusText : response.statusText,
                 data : responseData
             }
-        } ; 
+        }
+
+        if(data.variableName){
+            return {
+                ...context,
+                [data.variableName] : responsePayload
+            } ; 
+        }
+
+        return {
+            ...context,
+            ...responsePayload
+        } ;
     })
 
     // TODO : Publish "success" state for  http request

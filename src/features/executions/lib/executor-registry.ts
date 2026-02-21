@@ -6,7 +6,7 @@ import { httpRequestExecutor } from "../components/http-request/executor";
 export const executorRegistry : Record<NodeType,NodeExecutor> = {
     [NodeType.INITIAL] : manualTriggerExecutor,
     [NodeType.MANUAL_TRIGGER] : manualTriggerExecutor,
-    [NodeType.HTTP_REQUEST] : httpRequestExecutor,
+    [NodeType.HTTP_REQUEST] : httpRequestExecutor as NodeExecutor,  // TODO : resolve the types
 }
 
 export const getExecutor = (type : NodeType) : NodeExecutor =>{

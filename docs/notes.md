@@ -1278,3 +1278,402 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
     return result ;
 }
 ```
+
+
+# Passing Real Time Node Data using @inngest/realtime
+
+**Server Side** 
+1) importing `realtimeMiddleware` for passing data
+
+```ts
+import { Inngest } from "inngest";
+import { realtimeMiddleware } from "@inngest/realtime/middleware";
+
+
+export const inngest = new Inngest({ 
+    id: "nodebase" ,
+    middleware: [realtimeMiddleware()],
+});
+```
+
+2) creating channel for seprate node (here http-request node)
+
+src/inngest/channels/http-request.ts
+------------------------------------
+```ts
+import { channel , topic } from "@inngest/realtime" ;
+
+export const httpRequestChannel = channel("http-request-execution").addTopic(
+    topic("status").type<{
+        nodeId : string ;
+        status : "loading" | "success" | "error" ;
+    }>(),
+) ; 
+```
+
+3) using the creating channel in inggest function
+
+function.ts
+-----------
+```ts
+import { inngest } from "./client";
+import { NonRetriableError } from "inngest";
+import pClient from "@/lib/db";
+import { topologicalSort } from "./utils";
+import { NodeType } from "@prisma/client";
+import { getExecutor } from "@/features/executions/lib/executor-registry";
+import { httpRequestChannel } from "./channels/http-request";
+
+export const executeWorkflow = inngest.createFunction(
+  { id: "execute-workflow" },
+  { 
+    event: "workflows/execute.workflow",
+    // adding channels for real-time node status 
+    channels : [
+      httpRequestChannel() , 
+    ]
+  },
+  async ({ event, step , publish }) => {
+    const workflowId = event.data.workflowId ;  
+
+    if(!workflowId){
+      throw new NonRetriableError("Workflow ID is missing") ;  // inngest will not retry
+    }
+
+    const sortedNodes = await step.run("prepare-workflow",async() => {
+      const workflow = await pClient.workflow.findUniqueOrThrow({
+        where : {
+          id : workflowId
+        },
+        include : {
+          nodes : true , 
+          connections : true 
+        }
+      });
+      return topologicalSort(workflow.nodes,workflow.connections) ;
+    })
+
+    // Initilize the context with any initial data from trigger 
+    let context = event.data.initialData || {} ;
+    
+    // Execute each node 
+    for(const node of sortedNodes){
+      const executor = getExecutor(node.type as NodeType) ;
+      context = await executor({ 
+        data : node.data as Record<string,unknown>,
+        nodeId : node.id,
+        context,
+        step,
+        publish   // publishing to each node executor
+      })
+    }
+
+    return { 
+      workflowId ,
+      result : context
+    } ; 
+  },
+);  
+```
+
+
+4) publishing data 
+
+* using `publish` method 
+
+src\features\executions\components\http-request\executor.ts
+------------------------------------------------------------
+```tsx
+import type { NodeExecutor } from "@/features/executions/types";
+import { NonRetriableError } from "inngest";
+import ky from "ky";
+import type { Options as KyOptions } from "ky";
+import Handlebars from "handlebars" ;
+import { httpRequestChannel } from "@/inngest/channels/http-request";
+
+
+Handlebars.registerHelper("json",(context) =>{ 
+    let stringifiedJson = JSON.stringify(context,null,2) ;
+    let safeString = new Handlebars.SafeString(stringifiedJson) ;
+    return safeString ;
+}) ;
+
+type HttpRequestData = {
+    variableName : string,
+    endpoint : string ,
+    method : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
+    body? : string
+} ;
+
+export const httpRequestExecutor : NodeExecutor<HttpRequestData> 
+= async({
+    data,
+    nodeId,
+    context,
+    step,
+    publish
+}) => {
+
+    const status = {
+        loading : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "loading"
+            }))
+        },
+        error : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "error",
+            }))
+        },
+        success : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "success"
+            }))
+        }
+    }
+
+    await status.loading() ;
+    
+    if(!data.endpoint){
+        await status.error() ;
+        throw new NonRetriableError("HTTP Request node : No endpoint configured") ;
+    }
+
+    if(!data.variableName){
+        await status.error() ;
+        throw new NonRetriableError("Variable name not configured") ;
+    }
+ 
+    if(!data.method){
+        await status.error() ;
+        throw new NonRetriableError("Method not configured") ;
+    }
+
+    const result = await step.run("http-request",async() => {
+        const method = data.method ;
+        /*
+        using handlebar module we can retrive,
+        value of json data (in format of {{variableName.httpResponse.data}}) present in the "endpoint" string
+        will be retrieved from the context (here it contains the data of the past nodes)
+        */
+        const endpoint = Handlebars.compile(data.endpoint)(context) ;  
+        const options : KyOptions = { method } ;
+ 
+        if(["POST","PUT","PATCH"].includes(method)){
+            const resolved = Handlebars.compile(data.body ?? "{}")(context) ;
+            JSON.parse(resolved) ;
+            options.body = resolved ;
+            options.headers = {
+                "Content-Type" : "application/json"
+            };
+        }
+
+        const response = await ky(endpoint,options) ;
+        const contentType = response.headers.get("content-type") ;
+        const responseData = contentType?.includes("application/json") 
+                            ? await response.json() 
+                            : await response.text()  ;
+
+        const responsePayload = {
+            httpResponse : {
+                status : response.status,
+                statusText : response.statusText,
+                data : responseData
+            }
+        }
+
+        return {
+            ...context,
+            [data.variableName] : responsePayload
+        } ; 
+    })
+
+    await status.success() ;
+    return result ;
+}
+```
+
+**using on client side**
+
+1) Creating a hook 
+
+src/features/executions/hooks/use-node-status.ts
+--------------------------------------------------
+```ts
+import type { Realtime } from "@inngest/realtime";
+import { useInngestSubscription } from "@inngest/realtime/hooks";
+import { useEffect, useState } from "react";
+import type { NodeStatus } from "@/components/react-flow/node-status-indicator";
+
+interface useNodeStatusOptions{
+    nodeId : string ; 
+    channel : string ; 
+    topic : string ;
+    refreshToken : () => Promise<Realtime.Subscribe.Token>
+}
+
+export function useNodeStatus({
+    nodeId ,
+    channel,
+    topic ,
+    refreshToken
+} : useNodeStatusOptions){
+    const [status,setStatus] = useState<NodeStatus>("initial") ;
+    const { data } = useInngestSubscription({
+        refreshToken,
+        enabled : true
+    }) ;
+
+    useEffect(() =>{
+        if(!data?.length) return ;
+    
+        // find lastest message for this node 
+        const lastestMessage = data.filter(
+            (msg) => {
+                msg.kind === "data" &&
+                msg.channel === channel &&
+                msg.topic === topic && 
+                msg.data.nodeId === nodeId
+            }
+        )
+        .sort((a,b) =>{
+            if(a.kind === "data" && b.kind === "data"){
+                return (
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                );
+            }
+            return 0 ;
+        })[0] ;
+
+        if(lastestMessage?.kind === "data"){
+            setStatus(lastestMessage.data.status as NodeStatus) ;
+        }
+
+    },[data,nodeId,channel,topic]) ; 
+
+    return status ; 
+} 
+```
+
+
+2) Creating RefreshToken Function for each channel (here for HttpRequst)
+
+action.ts
+---------
+```ts
+"use server";
+
+import { inngest } from "@/inngest/client";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
+import { getSubscriptionToken, Realtime } from "@inngest/realtime";
+import { getSession } from "better-auth/api";
+
+export type HttpRequestToken = Realtime.Token<
+    typeof httpRequestChannel, 
+    ["status"]
+>;
+
+export async function fetchHttpRequestRealTimeToken(): Promise<HttpRequestToken> {
+  const userId  =  getSession();
+
+  const token = await getSubscriptionToken(inngest, {
+    channel: httpRequestChannel(),
+    topics: ["status"],
+  });
+
+  return token;
+}
+```
+
+3) using hook 
+
+node.tsx
+--------
+```tsx
+"use client" ;
+
+import { Node , NodeProps, useReactFlow } from "@xyflow/react" ;
+import { GlobeIcon } from "lucide-react";
+import { memo, useState } from "react" ;
+import { BaseExecutionNode } from "../base-execution-node"; 
+import type { NodeStatus } from "@/components/react-flow/node-status-indicator";
+import { HttpRequestDialog, HttpRequestFormValues } from "./dialog";
+import { useNodeStatus } from "../../hooks/use-node-status";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
+import { fetchHttpRequestRealTimeToken } from "./actions";
+
+type HttpRequestNodeData = {
+    variableName? : string ;
+    endpoint?: string ;
+    method? : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
+    body?: string ;
+}; 
+
+type HttpRequestNodeType = Node<HttpRequestNodeData> ;
+
+export const HttpRequestNode = memo((props : NodeProps<HttpRequestNodeType>) => {
+    const nodeData = props.data ;
+    const description = (nodeData.endpoint) ? 
+                        `${nodeData.method || "GET"} : ${nodeData.endpoint}` 
+                        : "Not configured" ;
+
+    // using hook to get status of node
+    const status : NodeStatus = useNodeStatus({
+        nodeId : props.id,
+        channel : httpRequestChannel().name,
+        topic : "status",
+        refreshToken : fetchHttpRequestRealTimeToken
+    }) ;
+    
+    const [dialogOpen , setDialogOpen] = useState(false) ;
+    const handleOpenSettings = () => setDialogOpen(true) ;
+
+    const { setNodes } = useReactFlow() ;
+
+    const handleSubmit = (values : HttpRequestFormValues) => {
+        setNodes((nodes) =>
+            nodes.map((node) =>{
+                if(node.id === props.id){
+                    return {
+                        ...node,
+                        data : {
+                            ...node.data ,
+                            ...values
+                        }
+                    }
+                }
+                return node ;
+            })
+        )
+    }
+
+    return (
+        <>
+            <HttpRequestDialog
+              open={dialogOpen} 
+              onOpenChange={setDialogOpen} 
+              onSubmit={handleSubmit}
+              defaultValues={nodeData}
+            />
+            <BaseExecutionNode
+                {...props}
+                id={props.id}
+                icon={GlobeIcon}
+                name="HTTP Request"
+                status={status}
+                description={description}
+                onSettings={handleOpenSettings}
+                onDoubleClick={handleOpenSettings}
+            />
+        </>
+    )
+})
+
+HttpRequestNode.displayName = "HttpRequestNode" ;
+```

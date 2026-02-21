@@ -1,19 +1,26 @@
 import { inngest } from "./client";
-import { google } from '@ai-sdk/google';
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from "@ai-sdk/anthropic";
-import { generateText } from 'ai';
-import * as Sentry from "@sentry/nextjs";
 import { NonRetriableError } from "inngest";
 import pClient from "@/lib/db";
 import { topologicalSort } from "./utils";
 import { NodeType } from "@prisma/client";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
+import { httpRequestChannel } from "./channels/http-request";
+import { manualTriggerChannel } from "./channels/manual-trigger";
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow" },
-  { event: "workflows/execute.workflow" },
-  async ({ event, step }) => {
+  { 
+    id: "execute-workflow", 
+    retries : 0  // remove in production
+  },
+  { 
+    event: "workflows/execute.workflow",
+    // adding channels for real-time node status 
+    channels : [
+      httpRequestChannel() , 
+      manualTriggerChannel()
+    ]
+  },
+  async ({ event, step , publish }) => {
     const workflowId = event.data.workflowId ;  
 
     if(!workflowId){
@@ -43,7 +50,8 @@ export const executeWorkflow = inngest.createFunction(
         data : node.data as Record<string,unknown>,
         nodeId : node.id,
         context,
-        step
+        step,
+        publish
       })
     }
 

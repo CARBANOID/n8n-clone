@@ -205,3 +205,11 @@ https://jotai.org/docs/guides/nextjs
 * Opens the Json Data present in string using the provided context to give the compiled string .
 
 -> npm i handlebars
+
+# Adding Real Time Status for Each Node ( i.e success,error,loading)
+https://www.inngest.com/docs/features/realtime?utm_source=youtube&utm_medium=video&utm_campaign=cwa_nodebase&utm_content=codewithantonio&ref=codewithantonio
+
+
+* using inngest/realtime package 
+
+-> npm install @inngest/realtime

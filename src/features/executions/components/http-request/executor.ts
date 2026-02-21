@@ -3,6 +3,7 @@ import { NonRetriableError } from "inngest";
 import ky from "ky";
 import type { Options as KyOptions } from "ky";
 import Handlebars from "handlebars" ;
+import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -23,25 +24,52 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
     data,
     nodeId,
     context,
-    step
+    step,
+    publish
 }) => {
-    // TODO : Publish "loading" state for http request
+
+    const status = {
+        loading : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "loading"
+            }))
+        },
+        error : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "error",
+            }))
+        },
+        success : async() => {
+            await publish(
+            httpRequestChannel().status({
+                nodeId : nodeId,
+                status : "success"
+            }))
+        }
+    }
+
+    await status.loading() ;
     
     if(!data.endpoint){
-        // TODO : Publish "error" state for http request
+        await status.error() ;
         throw new NonRetriableError("HTTP Request node : No endpoint configured") ;
     }
 
     if(!data.variableName){
-        // TODO : Publish "error" state for http request
+        await status.error() ;
         throw new NonRetriableError("Variable name not configured") ;
     }
-
+ 
     if(!data.method){
-        // TODO : Publish "error" state for http request
+        await status.error() ;
         throw new NonRetriableError("Method not configured") ;
     }
 
+    try{
     const result = await step.run("http-request",async() => {
         const method = data.method ;
         /*
@@ -81,6 +109,11 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
         } ; 
     })
 
-    // TODO : Publish "success" state for  http request
+    await status.success() ;
     return result ;
+    }
+    catch(error){
+        await status.error() ;
+        throw error ;
+    }
 }

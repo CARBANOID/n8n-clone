@@ -200,3 +200,8 @@ https://jotai.org/docs/guides/nextjs
 -> npm i ky
 
 * can use axios also
+
+# For Dynamic Parameters in Nodes
+* Opens the Json Data present in string using the provided context to give the compiled string .
+
+-> npm i handlebars

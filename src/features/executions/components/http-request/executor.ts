@@ -2,12 +2,19 @@ import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
 import ky from "ky";
 import type { Options as KyOptions } from "ky";
-import { Variable } from "lucide-react";
+import Handlebars from "handlebars" ;
+
+
+Handlebars.registerHelper("json",(context) =>{ 
+    let stringifiedJson = JSON.stringify(context,null,2) ;
+    let safeString = new Handlebars.SafeString(stringifiedJson) ;
+    return safeString ;
+}) ;
 
 type HttpRequestData = {
-    variableName? : string,
-    endpoint? : string ,
-    method? : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
+    variableName : string,
+    endpoint : string ,
+    method : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
     body? : string
 } ;
 
@@ -30,13 +37,25 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
         throw new NonRetriableError("Variable name not configured") ;
     }
 
-    const result = await step.run("http-request",async() => {
-        const method = data.method || "GET" ;
-        const endpoint = data.endpoint! ;
-        const options : KyOptions = { method } ;
+    if(!data.method){
+        // TODO : Publish "error" state for http request
+        throw new NonRetriableError("Method not configured") ;
+    }
 
+    const result = await step.run("http-request",async() => {
+        const method = data.method ;
+        /*
+        using handlebar module we can retrive,
+        value of json data (in format of {{variableName.httpResponse.data}}) present in the "endpoint" string
+        will be retrieved from the context (here it contains the data of the past nodes)
+        */
+        const endpoint = Handlebars.compile(data.endpoint)(context) ;  
+        const options : KyOptions = { method } ;
+ 
         if(["POST","PUT","PATCH"].includes(method)){
-            options.body = data.body ;
+            const resolved = Handlebars.compile(data.body ?? "{}")(context) ;
+            JSON.parse(resolved) ;
+            options.body = resolved ;
             options.headers = {
                 "Content-Type" : "application/json"
             };
@@ -56,17 +75,10 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
             }
         }
 
-        if(data.variableName){
-            return {
-                ...context,
-                [data.variableName] : responsePayload
-            } ; 
-        }
-
         return {
             ...context,
-            ...responsePayload
-        } ;
+            [data.variableName] : responsePayload
+        } ; 
     })
 
     // TODO : Publish "success" state for  http request

@@ -13,9 +13,9 @@ Handlebars.registerHelper("json",(context) =>{
 }) ;
 
 type HttpRequestData = {
-    variableName : string,
-    endpoint : string ,
-    method : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
+    variableName? : string,
+    endpoint? : string ,
+    method? : "GET" | "POST" | "PUT" | "PATCH" | "DELETE" ;
     body? : string
 } ;
 
@@ -53,24 +53,23 @@ export const httpRequestExecutor : NodeExecutor<HttpRequestData>
     }
 
     await status.loading() ;
-    
-    if(!data.endpoint){
-        await status.error() ;
-        throw new NonRetriableError("HTTP Request node : No endpoint configured") ;
-    }
-
-    if(!data.variableName){
-        await status.error() ;
-        throw new NonRetriableError("Variable name not configured") ;
-    }
- 
-    if(!data.method){
-        await status.error() ;
-        throw new NonRetriableError("Method not configured") ;
-    }
-
     try{
     const result = await step.run("http-request",async() => {
+        if(!data.endpoint){
+            await status.error() ;
+            throw new NonRetriableError("HTTP Request node : No endpoint configured") ;
+        }
+
+        if(!data.variableName){
+            await status.error() ;
+            throw new NonRetriableError("Variable name not configured") ;
+        }
+    
+        if(!data.method){
+            await status.error() ;
+            throw new NonRetriableError("Method not configured") ;
+        }
+
         const method = data.method ;
         /*
         using handlebar module we can retrive,

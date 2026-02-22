@@ -243,3 +243,30 @@ once configured run to forward the port 3000 ( where localhost is running),
 ```json
 "ngrok:dev": "dotenv -e .env.local -- ngrok http 3000"
 ```
+
+# To protect your webhook ( not done yet)
+-> you can use svix webhooks
+
+
+# To test Stripe with local listener
+-> download the Stripe CLI
+* for windowns [https://docs.stripe.com/stripe-cli/install?install-method=windows]
+
+* run this in terminal to check if stripe cli is downloaded
+-> stripe
+
+* Steps to setup local listener in
+1) Download the Stripe CLI 
+
+* Through cmd 
+2) log in with your Stripe account
+stripe login
+
+3) Forward events to your destination
+stripe listen --forward-to "localhost:3000/api/webhooks/stripe?workflowId=cml3i3cfw0001vnfg2qu9px2l"
+
+
+4) Trigger events with the CLI
+stripe trigger payment_intent.succeeded
+
+**In stripe we can authenticate the webhook using the stripe signing secret**

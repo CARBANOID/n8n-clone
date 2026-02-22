@@ -213,3 +213,33 @@ https://www.inngest.com/docs/features/realtime?utm_source=youtube&utm_medium=vid
 * using inngest/realtime package 
 
 -> npm install @inngest/realtime
+
+
+# ngrok -> Webhook Testing (exposing localhost to public url)
+* used for adding local tunnel
+* offers one static domain for free
+
+* Using Ngrok as an agent ( for windows )
+
+steps [https://dashboard.ngrok.com/get-started/setup/windows]
+-----
+once configured run to forward the port 3000 ( where localhost is running),
+-> ngrok http 3000
+
+**you will see a forwarding url in the ngork interface**
+-> everytime you restart the server the forwarding url get changed
+
+-> You can solve this by going to domains [https://dashboard.ngrok.com/domains]
+* select the domain 
+* go to cli button and copy the command
+* run that command in your terminal
+
+* now the forwarding url will not change
+
+# for loading env variable in package.json
+-> npm i dotenv-cli -D 
+
+* add this in package.json
+```json
+"ngrok:dev": "dotenv -e .env.local -- ngrok http 3000"
+```

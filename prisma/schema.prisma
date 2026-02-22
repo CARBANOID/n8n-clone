@@ -10,7 +10,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
 }
 
 model User {
@@ -93,6 +92,7 @@ enum NodeType {
   INITIAL
   MANUAL_TRIGGER
   HTTP_REQUEST
+  GOOGLE_FORM_TRIGGER
 }
 
 model Node{

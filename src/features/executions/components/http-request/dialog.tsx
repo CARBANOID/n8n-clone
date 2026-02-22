@@ -40,7 +40,7 @@ const formSchema = z.object({
                   .regex(/^[a-zA-Z_$][a-zA-Z0-9_]*$/ , {
                     message : "Variable name must start with a letter or underscore and can contain letters, numbers, and underscores."
                   }),
-    endpoint : z.url({message : "Invalid URL"}),
+    endpoint : z.string().min(1,{message : "Invalid URL"}),
     method : z.enum(['GET' , 'POST' , 'PUT' , 'DELETE' , 'PATCH']),
     body :  z.
             string(). 
@@ -201,8 +201,8 @@ export const HttpRequestDialog = ({
                                             </FormControl>
                                             <FormDescription>
                                                 JSON with template variables , Use {"{{variables}}"} for 
-                                                simple values or {"{{json  variable}}"} to 
-                                                stringify objects.
+                                                simple values or <br/> 
+                                                {"{{json  variable}}"} to stringify objects.
                                             </FormDescription>
                                             <FormMessage />     {/* Appears when there is an error */}
                                         </FormItem>

@@ -8,10 +8,10 @@ const globalForPrisma = global as unknown as {
 }
 
 const adapter = globalForPrisma.adapter || new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: process.env.DATABASE_URL ,
 });
 
-const pClient = globalForPrisma.prisma || new PrismaClient({adapter}) ; 
+const pClient = globalForPrisma.prisma || new PrismaClient({ adapter }) ; 
 
 if(process.env.NODE_ENV !== "production"){
     globalForPrisma.prisma  = pClient  ;

@@ -6,6 +6,7 @@ import { NodeType } from "@prisma/client";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { httpRequestChannel } from "./channels/http-request";
 import { manualTriggerChannel } from "./channels/manual-trigger";
+import { googleFormTriggerChannel } from "./channels/google-form-trigger";
 
 export const executeWorkflow = inngest.createFunction(
   { 
@@ -17,7 +18,8 @@ export const executeWorkflow = inngest.createFunction(
     // adding channels for real-time node status 
     channels : [
       httpRequestChannel() , 
-      manualTriggerChannel()
+      manualTriggerChannel(),
+      googleFormTriggerChannel()
     ]
   },
   async ({ event, step , publish }) => {

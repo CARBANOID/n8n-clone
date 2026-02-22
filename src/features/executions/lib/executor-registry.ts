@@ -4,20 +4,26 @@ import { manualTriggerExecutor } from "@/features/trigger/components/manual-trig
 import { httpRequestExecutor } from "../components/http-request/executor";
 import { googleFormTriggerExecutor } from "../../trigger/components/google-form-trigger/executor";
 import { stripeTriggerExecutor } from "@/features/trigger/components/stripe-trigger/executor";
+import { geminiExecutor } from "../components/gemini/executor";
+import { openAIExecutor } from "../components/openai/executor";
+import { anthropicExecutor } from "../components/anthropic/executor";
 
-export const executorRegistry : Record<NodeType,NodeExecutor> = {
-    [NodeType.INITIAL] : manualTriggerExecutor,
-    [NodeType.MANUAL_TRIGGER] : manualTriggerExecutor,
-    [NodeType.HTTP_REQUEST] : httpRequestExecutor, 
-    [NodeType.GOOGLE_FORM_TRIGGER] : googleFormTriggerExecutor ,
-    [NodeType.STRIPE_TRIGGER] : stripeTriggerExecutor ,
+export const executorRegistry: Record<NodeType, NodeExecutor> = {
+    [NodeType.INITIAL]: manualTriggerExecutor,
+    [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
+    [NodeType.HTTP_REQUEST]: httpRequestExecutor,
+    [NodeType.GOOGLE_FORM_TRIGGER]: googleFormTriggerExecutor,
+    [NodeType.STRIPE_TRIGGER]: stripeTriggerExecutor,
+    [NodeType.GEMINI]: geminiExecutor,
+    [NodeType.OPENAI]: openAIExecutor,
+    [NodeType.ANTHROPIC]: anthropicExecutor,
 }
 
-export const getExecutor = (type : NodeType) : NodeExecutor =>{
-    const executor = executorRegistry[type] ;
-    if(!executor){
+export const getExecutor = (type: NodeType): NodeExecutor => {
+    const executor = executorRegistry[type];
+    if (!executor) {
         throw new Error(`No executor found for node type : ${type}`)
     }
-    return executor ;
+    return executor;
 }
 

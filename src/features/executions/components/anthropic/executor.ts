@@ -5,6 +5,7 @@ import { createAnthropic } from "@ai-sdk/anthropic"
 import Handlebars from "handlebars" ;
 import { AVAILABLE_MODELS } from "./dialog";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
+import pClient from "@/lib/db";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -16,6 +17,7 @@ Handlebars.registerHelper("json",(context) =>{
 type AnthropicNodeData = {
     variableName? : string,
     model? : typeof AVAILABLE_MODELS[0],
+    credentialId? : string,
     systemPrompt? : string,
     userPrompt? : string
 } ;
@@ -65,6 +67,12 @@ export const anthropicExecutor : NodeExecutor<AnthropicNodeData>
         throw new NonRetriableError("Anthropic Node : user prompt is missing") ;
     }
     
+
+    if(!data.credentialId){
+        await status.error() ;
+        throw new NonRetriableError("Anthropic Node : Credential id is required") ;
+    }
+
     const systemPrompt = data.systemPrompt 
     ? Handlebars.compile(data.systemPrompt)(context)
     : "You are a helpful assistant"
@@ -73,12 +81,21 @@ export const anthropicExecutor : NodeExecutor<AnthropicNodeData>
     ? Handlebars.compile(data.userPrompt)(context)
     : ""
 
-    // TODO : Throw for credential missing
-    
-    const credentialsValue = process.env.ANTHROPIC_API_KEY ;
+    const credential = await step.run("get-credential",() =>{
+        return pClient.credential.findUnique({
+            where : {
+                id : data.credentialId
+            }
+        })
+    }) 
 
+    if(!credential){
+        await status.error() ;
+        throw new NonRetriableError("Anthropic Node : Credential not found") ;
+    }
+    
     const anthropic = createAnthropic({
-        apiKey : credentialsValue,
+        apiKey : credential.value,
     })
 
     try{

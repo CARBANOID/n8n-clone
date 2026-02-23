@@ -467,11 +467,27 @@ export const appRouter = createTRPCRouter({
 export type AppRouter = typeof appRouter;
 ```
 
+# Tanstack useQuery vs useMutation
 
 * These tanstack react query hooks are used in client component and can execute the promises
 
 -> useQuery for .query()  
 -> useMutation for .mutation()
+
+# Tanstack useQuery vs useSuspenseQuery
+
+* These tanstack react query hooks are used in client component and can execute the promises
+
+* **useSuspenseQuery** 
+-> data is guaranteed to be prefetched before the component renders. It integrates with React's Suspense boundary, so the component suspends (waits) until data is ready. By the time your component renders, data is always defined — no isLoading or data?.field checks needed.
+
+* on the server component :
+  -> has to `prefetch()` 
+  -> and create a `Hydration boundary` using `HydrateClient`
+
+**useQuery** 
+-> data is not prefetched. The component renders immediately with data = undefined on the first render, then updates once the fetch completes. That's why you always need to handle isLoading / isPending states.
+
 
 page.tsx (src/app/page.tsx)
 --------

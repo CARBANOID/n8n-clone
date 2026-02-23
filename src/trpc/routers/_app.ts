@@ -1,3 +1,4 @@
+import { credentialRouter } from '@/features/credentials/server/routers';
 import { createTRPCRouter } from '../init';
 import { workflowsRouter } from '@/features/workflows/servers/routers';
 
@@ -15,6 +16,7 @@ in trpc we call the procedure directly as a function
 
 export const appRouter = createTRPCRouter({
   workflows : workflowsRouter , 
+  credentials : credentialRouter
 
 });
 // export type definition of API

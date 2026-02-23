@@ -32,6 +32,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { useCredentialByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@prisma/client";
+import Image from "next/image";
 
 export const AVAILABLE_MODELS = [
 'o1',
@@ -83,6 +86,7 @@ const formSchema = z.object({
                   .regex(/^[a-zA-Z_$][a-zA-Z0-9_]*$/ , {
                     message : "Variable name must start with a letter or underscore and can contain letters, numbers, and underscores."
                   }),
+    credentialId : z.string().min(1,{message : "Credential is required"}),
     model : z.string().min(1,{message : "Model is required"}),
     systemPrompt : z.string().optional(),
     userPrompt : z.string().min(1,{message : "User prompt is required"}),
@@ -107,9 +111,15 @@ export const OpenAIDialog = ({
     const defaultOpenAIFormValues = {
         variableName : defaultValues.variableName || "",
         model : defaultValues.model || AVAILABLE_MODELS[0],
+        credentialId : defaultValues.credentialId || "",
         systemPrompt : defaultValues.systemPrompt || "",
         userPrompt : defaultValues.userPrompt || "",
     }
+
+    const { 
+        data : credentials ,
+        isLoading : isLoadingCredentials,
+    } = useCredentialByType(CredentialType.OPENAI) ;
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver : zodResolver(formSchema) ,
@@ -138,11 +148,11 @@ export const OpenAIDialog = ({
                         Configure AI model and prompts for this node.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-1">
+                <div>
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(handleSubmit)}
-                            className="space-y-4 mt-4"
+                            className="space-y-4 mt-2"
                         >
                             <FormField
                                 control={form.control}
@@ -164,6 +174,46 @@ export const OpenAIDialog = ({
                                     </FormItem>
                                 )}
                             />                 
+
+                            <FormField
+                                control={form.control}
+                                name="credentialId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>OpenAI Credential</FormLabel>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            disabled={
+                                                isLoadingCredentials || !credentials?.length
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select a Credential" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {credentials?.map((credential) => (
+                                                    <SelectItem 
+                                                        key={credential.id} 
+                                                        value={credential.id}
+                                                    >
+                                                    <div className="flex items-center gap-2">
+                                                            <Image
+                                                                src={"/logos/openai.svg"}
+                                                                alt={"OpenAI"}
+                                                                width={16}
+                                                                height={16}
+                                                            />
+                                                            { credential.name }                                                                
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
 
                             <FormField
                                 control={form.control}
@@ -207,7 +257,7 @@ export const OpenAIDialog = ({
                                                 placeholder={
                                                     "You are a helpful assistant."
                                                 }
-                                                className="min-h-[120px] max-h-[140px] font-mono text-sm scroll-y-auto"
+                                                className="min-h-[100px] max-h-[140px] font-mono text-sm scroll-y-auto"
                                                 {...field}
                                         />
                                         </FormControl>
@@ -232,7 +282,7 @@ export const OpenAIDialog = ({
                                                 placeholder={
                                                     "Summarize the text : {{json aiResponse.data}} ."
                                                 }
-                                                className="min-h-[120px] max-h-[140px] font-mono text-sm scroll-y-auto"
+                                                className="min-h-[100px] max-h-[140px] font-mono text-sm scroll-y-auto"
                                                 {...field}
                                         />
                                         </FormControl>
@@ -246,7 +296,7 @@ export const OpenAIDialog = ({
                                 )}
                             />   
 
-                            <DialogFooter className="mt-4">
+                            <DialogFooter className="-mt-2">
                                 <Button type="submit">
                                     Save
                                 </Button>

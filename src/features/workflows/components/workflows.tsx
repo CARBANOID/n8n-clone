@@ -51,8 +51,7 @@ export const WorkflowsPagination = () =>{
 }
 
 export const WorkflowsList = () =>{
-    const workflows = useSuspenseWorkflows() ; 
-    if(workflows.data.items.length === 0) return <WorkflowsEmpty/>
+    const workflows = useSuspenseWorkflows() ;     
     
     return(
         <EntityList 
@@ -136,9 +135,10 @@ export const WorkflowsEmpty = () =>{
         <>
             {modal}
             <EmptyView
-            onNew={handleCreate} 
-            message="You haven't created any workflows yet. 
-            Get started by creaing your first workflow"/>
+                onNew={handleCreate} 
+                message="You haven't created any workflows yet. 
+                Get started by creaing your first workflow"
+            />
         </>
     )
 }

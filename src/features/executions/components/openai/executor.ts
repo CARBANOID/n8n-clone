@@ -5,6 +5,7 @@ import { createOpenAI } from "@ai-sdk/openai"
 import Handlebars from "handlebars";
 import { AVAILABLE_MODELS } from "./dialog";
 import { openAIChannel } from "@/inngest/channels/openai";
+import pClient from "@/lib/db";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -16,6 +17,7 @@ Handlebars.registerHelper("json", (context) => {
 type OpenAINodeData = {
     variableName?: string,
     model?: typeof AVAILABLE_MODELS[0],
+    credentialId? : string,
     systemPrompt?: string,
     userPrompt?: string
 };
@@ -65,6 +67,12 @@ export const openAIExecutor: NodeExecutor<OpenAINodeData>
             throw new NonRetriableError("OpenAI Node : user prompt is missing");
         }
 
+
+        if(!data.credentialId){
+            await status.error() ;
+            throw new NonRetriableError("OpenAI Node : Credential id is required") ;
+        }
+
         const systemPrompt = data.systemPrompt
             ? Handlebars.compile(data.systemPrompt)(context)
             : "You are a helpful assistant"
@@ -73,12 +81,21 @@ export const openAIExecutor: NodeExecutor<OpenAINodeData>
             ? Handlebars.compile(data.userPrompt)(context)
             : ""
 
-        // TODO : Throw for credential missing
+        const credential = await step.run("get-credential",() =>{
+            return pClient.credential.findUnique({
+                where : {
+                    id : data.credentialId
+                }
+            })
+        }) 
 
-        const credentialsValue = process.env.OPENAI_API_KEY;
-
+        if(!credential){
+            await status.error() ;
+            throw new NonRetriableError("OpenAI Node : Credential not found") ;
+        }
+        
         const openAI = createOpenAI({
-            apiKey: credentialsValue,
+            apiKey: credential.value,
         })
 
         try {

@@ -233,7 +233,7 @@ export const EmptyView = ({
     onNew
 } : EmptyViewProps) => {
     return (
-        <Empty className="border border-dashed bg-[#27314a]">
+        <Empty className="border border-dashed bg-shadow">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
                     <PackageOpenIcon/>
@@ -273,7 +273,7 @@ export function EntityList<T>({
     getKey, 
     emptyView,
     className
-} : EntityListProps<T>){
+} : EntityListProps<T>){``
     if(items.length === 0 && emptyView){
         return(
             <div className="flex-1 flex justify-center items-center">

@@ -26,6 +26,7 @@ export const anthropicExecutor : NodeExecutor<AnthropicNodeData>
 = async({
     data,
     nodeId,
+    userId,
     context,
     step,
     publish
@@ -82,9 +83,11 @@ export const anthropicExecutor : NodeExecutor<AnthropicNodeData>
     : ""
 
     const credential = await step.run("get-credential",() =>{
+
         return pClient.credential.findUnique({
             where : {
-                id : data.credentialId
+                id : data.credentialId,
+                userId
             }
         })
     }) 

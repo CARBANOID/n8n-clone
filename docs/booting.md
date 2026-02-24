@@ -270,3 +270,7 @@ stripe listen --forward-to "localhost:3000/api/webhooks/stripe?workflowId=cml3i3
 stripe trigger payment_intent.succeeded
 
 **In stripe we can authenticate the webhook using the stripe signing secret**
+
+
+# Making handlebars compatible with discord
+-> npm i html-entities

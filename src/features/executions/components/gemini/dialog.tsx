@@ -37,6 +37,7 @@ import { CredentialType } from "@prisma/client";
 import Image from "next/image";
 
 export const AVAILABLE_MODELS = [
+ 'gemini-2.5-flash',
  'gemini-1.5-flash',
  'gemini-1.5-flash-latest',
  'gemini-1.5-flash-001',
@@ -56,7 +57,6 @@ export const AVAILABLE_MODELS = [
  'gemini-2.0-flash-thinking-exp-01-21',
  'gemini-2.0-flash-exp',
  'gemini-2.5-pro',
- 'gemini-2.5-flash',
  'gemini-2.5-flash-image-preview',
  'gemini-2.5-flash-lite',
  'gemini-2.5-flash-lite-preview-09-2025',

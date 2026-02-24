@@ -26,6 +26,7 @@ export const openAIExecutor: NodeExecutor<OpenAINodeData>
     = async ({
         data,
         nodeId,
+        userId,
         context,
         step,
         publish
@@ -84,7 +85,8 @@ export const openAIExecutor: NodeExecutor<OpenAINodeData>
         const credential = await step.run("get-credential",() =>{
             return pClient.credential.findUnique({
                 where : {
-                    id : data.credentialId
+                    id : data.credentialId,
+                    userId
                 }
             })
         }) 

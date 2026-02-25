@@ -4,7 +4,7 @@ import { z } from "zod";
 import { PAGINATION } from "@/config/constants";
 import { CredentialType } from "@prisma/client";
 
-export const credentialRouter = createTRPCRouter({
+export const credentialsRouter = createTRPCRouter({
     create : premiumProcedure
         .input(z.object({
             name : z.string().min(1,"Name is Required"),

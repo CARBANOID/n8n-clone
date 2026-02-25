@@ -6,6 +6,7 @@ import Handlebars from "handlebars" ;
 import { AVAILABLE_MODELS } from "./dialog";
 import { geminiChannel } from "@/inngest/channels/gemini";
 import pClient from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -97,7 +98,7 @@ export const geminiExecutor : NodeExecutor<GeminiNodeData>
     }
 
     const google = createGoogleGenerativeAI({
-        apiKey : credential.value,
+        apiKey : decrypt(credential.value),
     })
 
     try{

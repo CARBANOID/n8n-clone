@@ -6,6 +6,7 @@ import Handlebars from "handlebars";
 import { AVAILABLE_MODELS } from "./dialog";
 import { openAIChannel } from "@/inngest/channels/openai";
 import pClient from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -97,7 +98,7 @@ export const openAIExecutor: NodeExecutor<OpenAINodeData>
         }
         
         const openAI = createOpenAI({
-            apiKey: credential.value,
+            apiKey : decrypt(credential.value),
         })
 
         try {

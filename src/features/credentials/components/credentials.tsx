@@ -18,7 +18,6 @@ import { useRouter } from "next/navigation";
 import { useCredentialsParams } from "../hooks/use-credentials-params";
 import { useEntitySearch } from "@/hooks/use-entity-search";
 import { CredentialType, type Credential } from "@prisma/client";
-import { KeyIcon } from "lucide-react";
 import Image from "next/image";
 
 export const CredentialsSearch = () =>{

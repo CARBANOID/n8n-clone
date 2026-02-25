@@ -3,7 +3,7 @@ import { ErrorView, LoadingView } from "@/components/entity-components"
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows"
 import { useState , useCallback, useMemo } from "react"
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge,Background, Controls, MiniMap , Panel } from '@xyflow/react';
-import type { Node, Edge, NodeChange, EdgeChange, Connection } from '@xyflow/react';
+import type { Node, Edge, NodeChange, EdgeChange, Connection, ColorMode } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "@/components/add-node-button";
@@ -11,6 +11,7 @@ import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
 import { NodeType } from "@prisma/client";
 import { ExecuteWorkflowButton } from "./execute-worklfow-button";
+import { useTheme } from "next-themes";
 
 export const EditorLoading = () => {
    return <LoadingView message="Loading editor..."/>
@@ -45,6 +46,8 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
         return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER) ;
     },[nodes])
 
+    const {theme,setTheme} = useTheme() ;
+
     return (
     <div className="size-full">
       <ReactFlow
@@ -64,6 +67,7 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
         panOnScroll
         panOnDrag={false}
         selectionOnDrag
+        colorMode={theme as ColorMode}
       > 
         <Background/> {/* To add grids in the background */}
         <Controls/>   {/* To add zoom in and out with lock functionality*/}

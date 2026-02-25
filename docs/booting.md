@@ -277,3 +277,6 @@ stripe trigger payment_intent.succeeded
 
 # For Credential Encrytion
 -> npm i cryptr 
+
+# hook of theme 
+ npm i next-themes 

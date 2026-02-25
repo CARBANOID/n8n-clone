@@ -1693,3 +1693,45 @@ export const HttpRequestNode = memo((props : NodeProps<HttpRequestNodeType>) => 
 
 HttpRequestNode.displayName = "HttpRequestNode" ;
 ```
+
+# useTheme() hook for theme toggle 
+
+import { ThemeProvider } from "next-themes";
+
+```tsx
+import { ThemeProvider } from "next-themes";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+* use it like this 
+
+```tsx
+"use client";
+
+import { useTheme } from "next-themes";
+
+export default function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <button
+      onClick={() =>
+        setTheme(theme === "dark" ? "light" : "dark")
+      }
+    >
+      Toggle Theme
+    </button>
+  );
+}
+```

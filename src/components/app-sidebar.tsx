@@ -6,7 +6,7 @@ import {
     HistoryIcon , 
     KeyIcon , 
     LogOutIcon , 
-    StarIcon 
+    StarIcon
 } from "lucide-react" ;
 
 import Image from "next/image";
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar" ;
 import { authClient } from "@/lib/auth-client";
 import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscriptions";
+import { ThemeToggleButton } from "./theme-toggle-button";
 
 
 const menuItems = [
@@ -118,6 +119,11 @@ export const AppSideBar = () => {
                     </SidebarMenuButton>
                 </SidebarMenuItem> 
                 }
+
+                <SidebarMenuItem>
+                    <ThemeToggleButton/>
+                </SidebarMenuItem>
+
                 <SidebarMenuItem>
                     <SidebarMenuButton 
                      tooltip="Billing Portal"
@@ -128,6 +134,7 @@ export const AppSideBar = () => {
                         <span>Billing Portal</span>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
+
                 <SidebarMenuItem>
                     <SidebarMenuButton 
                      tooltip="Sign out"

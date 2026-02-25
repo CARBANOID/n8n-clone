@@ -3,6 +3,7 @@ import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/i
 import { z } from "zod";
 import { PAGINATION } from "@/config/constants";
 import { CredentialType } from "@prisma/client";
+import { encrpyt } from "@/lib/encryption";
 
 export const credentialsRouter = createTRPCRouter({
     create : premiumProcedure
@@ -17,7 +18,7 @@ export const credentialsRouter = createTRPCRouter({
                 data : {
                     name,
                     type,
-                    value,  // TODO : Consider encrypting in production  -> Amazon Secrets Manager
+                    value : encrpyt(value),  // TODO : Consider encrypting in production  -> Amazon Secrets Manager
                     userId : ctx.auth.user.id
                 }
             })
@@ -51,7 +52,7 @@ export const credentialsRouter = createTRPCRouter({
                 data : {
                     name,
                     type,
-                    value  // TODO : Consider encrypting in production  -> Amazon Secrets Manager
+                    value : encrpyt(value)
                 }
             });
         }),

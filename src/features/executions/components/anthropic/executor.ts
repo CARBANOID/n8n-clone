@@ -6,6 +6,7 @@ import Handlebars from "handlebars" ;
 import { AVAILABLE_MODELS } from "./dialog";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
 import pClient from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -98,7 +99,7 @@ export const anthropicExecutor : NodeExecutor<AnthropicNodeData>
     }
     
     const anthropic = createAnthropic({
-        apiKey : credential.value,
+        apiKey : decrypt(credential.value),
     })
 
     try{

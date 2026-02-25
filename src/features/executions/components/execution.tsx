@@ -118,13 +118,13 @@ export const ExecutionView = ({
                             <p className="text-sm font-medium text-red-900 mb-2 ">
                                 Error
                             </p>
-                            <p className="text-sm text-red-800 font-mono">
+                            <div className="text-sm text-red-800 font-mono">
                                 {execution.errorStack &&(
                                     <Collapsible
                                         open={showStackTrace}
                                         onOpenChange={setShowStackTrace}
                                     >
-                                        <CollapsibleTrigger>
+                                        <CollapsibleTrigger asChild>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -144,7 +144,7 @@ export const ExecutionView = ({
                                         </CollapsibleContent>
                                     </Collapsible>
                                 )}
-                            </p>
+                            </div>
                         </div>
                     </div>
                     )}

@@ -274,3 +274,6 @@ stripe trigger payment_intent.succeeded
 
 # Making handlebars compatible with discord
 -> npm i html-entities
+
+# For Credential Encrytion
+-> npm i cryptr 

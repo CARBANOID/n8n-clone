@@ -14,7 +14,7 @@ type Props = {
 const Page = async({ searchParams } : Props) => {
     await requireAuth() ;
     const params = await workflowsParamsLoader(searchParams) ;
-    prefetchWorkflows(params) ; 
+    await prefetchWorkflows(params) ; 
 
     return (
         <WorkflowsContainer>

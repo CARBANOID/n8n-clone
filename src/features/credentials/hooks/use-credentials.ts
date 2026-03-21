@@ -5,7 +5,7 @@ import { useCredentialsParams } from "./use-credentials-params";
 import { CredentialType } from "@prisma/client";
 
 /**
- * Hook to fetch all credential using suspense
+ * Hook to fetch all credential of a page using suspense
 */
 
 export const useSuspenseCredentials = () => {
@@ -14,12 +14,19 @@ export const useSuspenseCredentials = () => {
     return useSuspenseQuery(trpc.credentials.getMany.queryOptions(params)) ;
 }
 
+
+export const useCredentials = (params  : { page : number , pageSize? : number , search? : string }) =>{
+    const trpc = useTRPC() ;
+    return useQuery(trpc.credentials.getMany.queryOptions(params)) ;
+}
+
+
 /**
  * Hook to create a credential
 */
 
-export const useCreateCredential = () => {
-    const trpc = useTRPC() ; 
+export const useCreateCredential = () => {  
+    const trpc = useTRPC() ;  
     const queryClient = useQueryClient() ;
 
     return useMutation(trpc.credentials.create.mutationOptions({

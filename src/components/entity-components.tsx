@@ -273,7 +273,7 @@ export function EntityList<T>({
     getKey, 
     emptyView,
     className
-} : EntityListProps<T>){``
+} : EntityListProps<T>){
     if(items.length === 0 && emptyView){
         return(
             <div className="flex-1 flex justify-center items-center">

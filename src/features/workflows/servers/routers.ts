@@ -8,231 +8,231 @@ import type { Node, Edge } from "@xyflow/react";
 import { sendWorkflowExecution } from "@/inngest/utils";
 
 export const workflowsRouter = createTRPCRouter({
-    execute : protectedProcedure
-        .input(z.object({ id : z.string() }))
-        .mutation(async({ ctx , input }) =>{
-        const workflow = await pClient.workflow.findUniqueOrThrow({
-            where : {
-                id : input.id,
-                userId : ctx.auth.user.id 
-            }
-        })
+    execute: protectedProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const workflow = await pClient.workflow.findUniqueOrThrow({
+                where: {
+                    id: input.id,
+                    userId: ctx.auth.user.id
+                }
+            })
 
-        await sendWorkflowExecution({ workflowId : input.id })
-        
-        return workflow ; 
-    }),
-    create : premiumProcedure.mutation(async({ ctx }) =>{
+            await sendWorkflowExecution({ workflowId: input.id })
+
+            return workflow;
+        }),
+    create: premiumProcedure.mutation(async ({ ctx }) => {
         return pClient.workflow.create({
-            data : {
-                name   : generateSlug(3),
-                userId : ctx.auth.user.id,
-                nodes   : {
-                    create : {
-                        type : NodeType.INITIAL,
-                        position : { x : 0 , y : 0},
-                        name : NodeType.INITIAL
+            data: {
+                name: generateSlug(3),
+                userId: ctx.auth.user.id,
+                nodes: {
+                    create: {
+                        type: NodeType.INITIAL,
+                        position: { x: 0, y: 0 },
+                        name: NodeType.INITIAL
                     }
                 }
             }
         })
     }),
-    remove : protectedProcedure
+    remove: protectedProcedure
         .input(z.object({
-            id : z.string()
+            id: z.string()
         }))
-        .mutation(async({ ctx , input }) =>{
-        return pClient.workflow.delete({
-            where : {
-                id : input.id ,
-                userId : ctx.auth.user.id 
-            }
-        })
-    }),
-    update : protectedProcedure
+        .mutation(async ({ ctx, input }) => {
+            return pClient.workflow.delete({
+                where: {
+                    id: input.id,
+                    userId: ctx.auth.user.id
+                }
+            })
+        }),
+    update: protectedProcedure
         .input(z.object({
-            id : z.string(),
-            nodes : z.array(
+            id: z.string(),
+            nodes: z.array(
                 z.object({
-                    id : z.string(),
-                    type : z.string().nullish(),
-                    position : z.object({ x : z.number() , y : z.number()}),
-                    data : z.record(z.string(),z.any())  // z.record(key,value)
+                    id: z.string(),
+                    type: z.string().nullish(),
+                    position: z.object({ x: z.number(), y: z.number() }),
+                    data: z.record(z.string(), z.any())  // z.record(key,value)
                 })
             ),
-            edges : z.array(
+            edges: z.array(
                 z.object({
-                    source : z.string(),
-                    target : z.string(),
-                    sourceHandle : z.string().nullish(),
-                    targetHandle : z.string().nullish()
+                    source: z.string(),
+                    target: z.string(),
+                    sourceHandle: z.string().nullish(),
+                    targetHandle: z.string().nullish()
                 })
             )
         }))
-        .mutation(async({ ctx , input }) =>{
-            const { id , nodes , edges } = input ;
-          
+        .mutation(async ({ ctx, input }) => {
+            const { id, nodes, edges } = input;
+
             const workflow = await pClient.workflow.findUniqueOrThrow({
-                where : {
-                    id , userId : ctx.auth.user.id 
+                where: {
+                    id, userId: ctx.auth.user.id
                 }
             })
 
             // Transaction to ensure consistency
-            return await pClient.$transaction(async(tx) => {
+            return await pClient.$transaction(async (tx) => {
 
                 // this will deleted both all nodes and edges due to onCascade relation
                 await tx.node.deleteMany({
-                    where : {
-                        workflowId : id 
+                    where: {
+                        workflowId: id
                     }
-                }) ;
+                });
 
                 // Create new nodes
                 await tx.node.createMany({
-                    data : nodes.map((node) =>({
-                        id : node.id ,
-                        workflowId : id,
-                        name : node.type || "unknown",
-                        type : node.type as NodeType,
-                        position : node.position ,
-                        data : node.data || {}
+                    data: nodes.map((node) => ({
+                        id: node.id,
+                        workflowId: id,
+                        name: node.type || "unknown",
+                        type: node.type as NodeType,
+                        position: node.position,
+                        data: node.data || {}
                     }))
                 })
 
                 // Create connections
                 await tx.connection.createMany({
-                    data : edges.map((edge) => ({
-                        workflowId : id ,
-                        fromNodeId : edge.source ,
-                        toNodeId : edge.target ,
-                        fromOutput : edge.sourceHandle || "main" ,
-                        toInput : edge.targetHandle || "main"
+                    data: edges.map((edge) => ({
+                        workflowId: id,
+                        fromNodeId: edge.source,
+                        toNodeId: edge.target,
+                        fromOutput: edge.sourceHandle || "main",
+                        toInput: edge.targetHandle || "main"
                     }))
                 })
 
                 // Update workflow updateAt field
                 await tx.workflow.update({
-                    where : { id },
-                    data : { updatedAt : new Date() }
+                    where: { id },
+                    data: { updatedAt: new Date() }
                 })
-                
-                return workflow ;
+
+                return workflow;
             })
         }),
-    updateName : protectedProcedure
+    updateName: protectedProcedure
         .input(z.object({
-            id : z.string() , 
-            name : z.string().min(1)
+            id: z.string(),
+            name: z.string().min(1)
         }))
-        .mutation(async({ ctx , input }) =>{
-        return pClient.workflow.update({
-            where : {
-                id : input.id ,
-                userId : ctx.auth.user.id 
-            },
-            data : {
-                name : input.name
-            }
-        })
-    }),
-    getOne : protectedProcedure
-        .input(z.object({
-            id : z.string()
-        }))
-        .query(async({ ctx , input }) =>{
-        const workflow = await pClient.workflow.findUniqueOrThrow({
-            where : {
-                id : input.id ,
-                userId : ctx.auth.user.id
-            },
-            include : {
-                nodes : true ,
-                connections : true
-            }
-        })
-
-        // Transforming server nodes to react-flow compatiable nodes
-
-        const nodes : Node[] = workflow.nodes.map((node) => {
-            return {
-                id : node.id,
-                type : node.type,
-                position : node.position as { x : number , y : number },
-                data : (node.data as Record<string,unknown>) || {},
-            }
-        })
-
-        // Transforming server connections to react-flow compatiable edges
-
-        const edges : Edge[] = workflow.connections.map((connection) => {
-            return {
-                id : connection.id,
-                source : connection.fromNodeId,
-                target : connection.toNodeId,
-                sourceHandle : connection.fromOutput,
-                targetHandle : connection.toInput
-            }
-        })
-
-        return {
-            id : workflow.id,
-            name : workflow.name,
-            nodes,
-            edges
-        }
-    }),
-    getMany : protectedProcedure
-        .input(z.object({
-            page : z.number().min(1).default(PAGINATION.DEFAULT_PAGE) ,
-            pageSize : z
-            .number()
-            .min(PAGINATION.MIN_PAGE_SIZE)
-            .max(PAGINATION.MAX_PAGE_SIZE)
-            .default(PAGINATION.DEFAULT_PAGE_SIZE),
-            search : z.string().default("")
-        }))
-        .query(async({ ctx , input }) =>{
-        const { page , pageSize , search } = input ;
-        const [items , totalCount] = await Promise.all([
-            pClient.workflow.findMany({   // fetch the items of a particular page acc. to updatedAt field in desc order 
-                skip  : (page - 1) * pageSize ,  // no of page to skip
-                take  : pageSize ,   // no of items to take
-                where : {
-                    userId : ctx.auth.user.id , 
-                    name : {
-                        contains : search ,
-                        mode : "insensitive"   // case-insensitive
-                    }
+        .mutation(async ({ ctx, input }) => {
+            return pClient.workflow.update({
+                where: {
+                    id: input.id,
+                    userId: ctx.auth.user.id
                 },
-                orderBy : {
-                    updatedAt : "desc" 
+                data: {
+                    name: input.name
                 }
-            }),
-            pClient.workflow.count({ 
-                where : {
-                    userId : ctx.auth.user.id,
-                    name : {
-                        contains : search ,
-                        mode : "insensitive"   // case-insensitive
-                    }
-                }   
             })
-        ])
-        
-        const totalPages = Math.ceil(totalCount / pageSize) ;
-        const hasNextPage = page < totalPages ;
-        const hasPreviousPage = page > 1 ;
+        }),
+    getOne: protectedProcedure
+        .input(z.object({
+            id: z.string()
+        }))
+        .query(async ({ ctx, input }) => {
+            const workflow = await pClient.workflow.findUniqueOrThrow({
+                where: {
+                    id: input.id,
+                    userId: ctx.auth.user.id
+                },
+                include: {
+                    nodes: true,
+                    connections: true
+                }
+            })
 
-        return { 
-            items ,
-            page ,
-            pageSize , 
-            totalCount ,
-            totalPages ,
-            hasNextPage ,
-            hasPreviousPage
-        }
-    }),     
-}) ;
+            // Transforming server nodes to react-flow compatiable nodes
+
+            const nodes: Node[] = workflow.nodes.map((node) => {
+                return {
+                    id: node.id,
+                    type: node.type,
+                    position: node.position as { x: number, y: number },
+                    data: (node.data as Record<string, unknown>) || {},
+                }
+            })
+
+            // Transforming server connections to react-flow compatiable edges
+
+            const edges: Edge[] = workflow.connections.map((connection) => {
+                return {
+                    id: connection.id,
+                    source: connection.fromNodeId,
+                    target: connection.toNodeId,
+                    sourceHandle: connection.fromOutput,
+                    targetHandle: connection.toInput
+                }
+            })
+
+            return {
+                id: workflow.id,
+                name: workflow.name,
+                nodes,
+                edges
+            }
+        }),
+    getMany: protectedProcedure
+        .input(z.object({
+            page: z.number().min(1).default(PAGINATION.DEFAULT_PAGE),
+            pageSize: z
+                .number()
+                .min(PAGINATION.MIN_PAGE_SIZE)
+                .max(PAGINATION.MAX_PAGE_SIZE)
+                .default(PAGINATION.DEFAULT_PAGE_SIZE),
+            search: z.string().default("")
+        }))
+        .query(async ({ ctx, input }) => {
+            const { page, pageSize, search } = input;
+            const [items, totalCount] = await Promise.all([
+                pClient.workflow.findMany({   // fetch the items of a particular page acc. to updatedAt field in desc order 
+                    skip: (page - 1) * pageSize,  // no of page to skip
+                    take: pageSize,   // no of items to take
+                    where: {
+                        userId: ctx.auth.user.id,
+                        name: {
+                            contains: search,
+                            mode: "insensitive"   // case-insensitive
+                        }
+                    },
+                    orderBy: {
+                        updatedAt: "desc"
+                    }
+                }),
+                pClient.workflow.count({
+                    where: {
+                        userId: ctx.auth.user.id,
+                        name: {
+                            contains: search,
+                            mode: "insensitive"   // case-insensitive
+                        }
+                    }
+                })
+            ])
+
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const hasNextPage = page < totalPages;
+            const hasPreviousPage = page > 1;
+
+            return {
+                items,
+                page,
+                pageSize,
+                totalCount,
+                totalPages,
+                hasNextPage,
+                hasPreviousPage
+            }
+        }),
+});
 

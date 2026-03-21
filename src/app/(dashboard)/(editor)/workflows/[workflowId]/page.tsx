@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 import { Editor, EditorError, EditorLoading } from "@/features/editor/components/editor";
 import { EditorHeader } from "@/features/editor/components/editor-header";
+import { prefetchConversationNames } from "@/features/chats/servers/prefetch";
 
 
 interface pageProps {
@@ -14,7 +15,8 @@ interface pageProps {
 const Page = async({ params }: pageProps) => {
     await requireAuth() ;
     const { workflowId } = await params;
-    prefetchWorkflow(workflowId) ;
+    await prefetchWorkflow(workflowId) ;
+    await prefetchConversationNames(workflowId) ;
 
     return (
         <HydrateClient>

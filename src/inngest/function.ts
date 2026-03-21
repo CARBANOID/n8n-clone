@@ -13,6 +13,9 @@ import { openAIChannel } from "./channels/openai";
 import { anthropicChannel } from "./channels/anthropic";
 import { discordChannel } from "./channels/discord";
 import { slackChannel } from "./channels/slack";
+import { excelChannel } from "./channels/excel";
+import { aiWorkflowChannel } from "./channels/ai-workflow";
+import { createId } from "@paralleldrive/cuid2";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -43,7 +46,8 @@ export const executeWorkflow = inngest.createFunction(
       openAIChannel(),
       anthropicChannel(),
       discordChannel(),
-      slackChannel()
+      slackChannel(),
+      excelChannel()
     ]
   },
   async ({ event, step, publish }) => {
@@ -125,3 +129,71 @@ export const executeWorkflow = inngest.createFunction(
     };
   },
 );  
+
+export const createAIWorkflow = inngest.createFunction(
+  {
+    id: "create-ai-workflow",
+    retries: 0 , // remove in production
+  },
+  {
+    event: "workflows/create.ai.workflow",
+    channels: [ aiWorkflowChannel() ]
+  },
+  async ({ event, step, publish }) => {
+
+    const inngestEventId  = event.id ;
+    const workflowId = event.data.workflowId;
+
+    if (!inngestEventId || !workflowId) {
+      throw new NonRetriableError("Event ID or Workflow ID is missing");  // inngest will not retry
+    }
+
+    await step.run("create-execution", async () => {
+      return pClient.execution.create({
+        data : {
+          workflowId,
+          inngestEventId
+        }
+      })
+    })
+
+    const rawNodes      : any[] = event.data.nodes       || [] ;
+    const rawConnections: any[] = event.data.connections || [] ;
+
+    await step.run("publish-workflow", async () => {
+      const IdMap = new Map<string, string>() ;
+
+      const nodes = rawNodes.map((node: any, index: number) => {
+        const nodeId = createId() ;
+        IdMap.set(node.id.toString(), nodeId) ;
+        return {
+          id       : nodeId,
+          type     : node.type,
+          position : { x: 0, y: 0 },  // setting the position according to viewport on client side
+          data     : node.data || {},
+          _index   : index         // for respective positioning of nodes
+        };
+      }) ;
+
+      const connections = rawConnections.map((connection: any) => ({
+        id          : createId(),
+        source      : IdMap.get(connection.source?.toString()) || "",
+        target      : IdMap.get(connection.target?.toString()) || "",
+        sourceHandle: "source-1",
+        targetHandle: "target-1",
+      })) ;
+      
+      await publish(
+        aiWorkflowChannel().workflow({
+          workflowId,
+          nodes,
+          connections
+        })
+      ) ;
+
+      return { nodes, connections } ;
+    })
+
+    return { workflowId } ;
+});
+

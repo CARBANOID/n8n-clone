@@ -7,14 +7,14 @@ export const useSubscriptions = () => {
         queryFn  : async() => {
             const { data } = await authClient.customer.state() ;  // will give subscription state of user i.e base or pro tier
             return data ;  
-        } 
+        } ,
+        staleTime : 5 * 60 * 1000,
     })
 }
 
 
 export const useHasActiveSubscription = () => {
     const { data : customerState , isLoading  , ...rest} = useSubscriptions() ; 
-    // console.log(customerState) ; 
     const hasActiveSubscriptions = customerState?.activeSubscriptions && customerState.activeSubscriptions.length > 0  // user can have more than one active subscription
     
     return {

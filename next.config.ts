@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators : false , // to disable the next.js dev indicator
+  experimental : {
+    optimizePackageImports : ['lucide-react']
+  },
   async redirects(){
     return [{
       source : "/" ,

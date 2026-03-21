@@ -3,10 +3,10 @@ import { NonRetriableError } from "inngest";
 import { generateText } from "ai"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import Handlebars from "handlebars" ;
-import { AVAILABLE_MODELS } from "./dialog";
 import { geminiChannel } from "@/inngest/channels/gemini";
 import pClient from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
+import { GEMINI_MODELS } from "@/config/ai-models";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -18,7 +18,7 @@ Handlebars.registerHelper("json",(context) =>{
 type GeminiNodeData = {
     variableName? : string,
     credentialId? : string,
-    model? : typeof AVAILABLE_MODELS[0],
+    model? : typeof GEMINI_MODELS[0],
     systemPrompt? : string,
     userPrompt? : string
 } ;

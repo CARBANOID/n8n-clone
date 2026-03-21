@@ -8,7 +8,6 @@ import {
 } from "lucide-react"
 import { useCallback } from "react";
 import { toast } from "sonner";
-
 import {
     Sheet,
     SheetContent,
@@ -84,6 +83,12 @@ const executionNodes : NodeTypeOptions[] = [
         label : "Slack",
         description: "Send a message to Slack",
         icon: "/logos/slack.svg" 
+    },
+    {
+        type: NodeType.EXCEL,
+        label : "Excel",
+        description: "Store incomming json data to a .xlsx file ",
+        icon: "/logos/excel.svg" 
     }
 ];
 

@@ -3,10 +3,10 @@ import { NonRetriableError } from "inngest";
 import { generateText } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
 import Handlebars from "handlebars";
-import { AVAILABLE_MODELS } from "./dialog";
 import { openAIChannel } from "@/inngest/channels/openai";
 import pClient from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
+import { OPENAI_MODELS } from "@/config/ai-models";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -17,7 +17,7 @@ Handlebars.registerHelper("json", (context) => {
 
 type OpenAINodeData = {
     variableName?: string,
-    model?: typeof AVAILABLE_MODELS[0],
+    model?: typeof OPENAI_MODELS[0],
     credentialId? : string,
     systemPrompt?: string,
     userPrompt?: string

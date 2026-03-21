@@ -1,8 +1,8 @@
 import { CLAUDE_MODELS, GEMINI_MODELS, OPENAI_MODELS } from "@/config/ai-models";
 import { useCredentials } from "@/features/credentials/hooks/use-credentials";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -10,7 +10,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../ui/command";
+} from "@/components/ui/command"
 import { ChevronUp, Loader2 } from "lucide-react";
 import { useEntitySearch } from "@/hooks/use-entity-search";
 
@@ -21,21 +21,21 @@ const logos = {
 }
 
 type CredentialSelectorProps = {
-  credential : string | null ;
-  credentialType : string | null ;
-  selectedModel : string | null ;
-  setCredential : (credential : string) => void ;
-  setCredentialType : (credentialType : string) => void ;
-  setSelectedModel : (model : string | null) => void ;
+  credential: string | null;
+  credentialType: string | null;
+  selectedModel: string | null;
+  setCredential: (credential: string) => void;
+  setCredentialType: (credentialType: string) => void;
+  setSelectedModel: (model: string | null) => void;
 }
 
 export const CredentialSelector = ({
-   credential,
-   credentialType,
-   selectedModel,
-   setCredential, 
-   setCredentialType, 
-   setSelectedModel 
+  credential,
+  credentialType,
+  selectedModel,
+  setCredential,
+  setCredentialType,
+  setSelectedModel
 }: CredentialSelectorProps) => {
 
   const [models, setModels] = useState<string[]>([]);
@@ -48,11 +48,11 @@ export const CredentialSelector = ({
   });
 
   const { searchValue, onSearchChange } = useEntitySearch({  // debouncer for search input
-      params : pageInfo,
-      setParams : setPageInfo,
-  }) ;
+    params: pageInfo,
+    setParams: setPageInfo,
+  });
 
-  const getCredentials = useCredentials(pageInfo); 
+  const getCredentials = useCredentials(pageInfo);
 
   useEffect(() => {
     if (credentialType === "OPENAI") setModels(OPENAI_MODELS);
@@ -93,7 +93,7 @@ export const CredentialSelector = ({
             />
             <CommandList className="max-h-[250px]">
               <CommandGroup heading="Credentials">
-                { !getCredentials.isLoading && <CommandEmpty>No credential found.</CommandEmpty>}
+                {!getCredentials.isLoading && <CommandEmpty>No credential found.</CommandEmpty>}
                 {getCredentials.isLoading ? (
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
                     <Loader2 className="h-3 w-3 animate-spin" />

@@ -16,14 +16,14 @@ import { NodeType } from "@prisma/client";
 import { useParams } from "next/navigation";
 import { useCreateConversation, useGetConversationChats, useRemoveConversation } from "@/features/chats/hooks/use-conversations";
 import ky from "ky";
-import { AIHero } from "./ai-hero";
 import { PastConversations } from "./past-conversations";
 import { UserPromptBox } from "./user-prompt-box";
 import { ConversationBox } from "./conversation-box";
 import { SendPromptButton } from "./sendPromptButton";
 import { CredentialSelector } from "./credentialSelector";
-import { KeyBoardShortcuts } from "./utils";
+import { KeyBoardShortcuts } from "./keyboard-shortcuts";
 import { toast } from "sonner";
+import { ChatBotHero } from "./hero";
 
 export type NodeTypeOptions = {
   type: NodeType;
@@ -174,7 +174,7 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
         )}
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 bg-background/40 backdrop-blur-md">
-          <AIHero/>
+          <ChatBotHero/>
           <PastConversations
             workflowId = {workflowId}
             conversationId = {currentConversationId}

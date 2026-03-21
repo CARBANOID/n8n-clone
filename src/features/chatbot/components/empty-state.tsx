@@ -2,35 +2,6 @@ import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 
-export function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 py-0.5">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 animate-bounce"
-          style={{ animationDelay: `${i * 150}ms`, animationDuration: "900ms" }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export function KeyBoardShortcuts(){
-    return (
-        <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-muted-foreground/40 font-medium">
-            <span className="flex items-center gap-1">
-              <kbd className="font-mono rounded bg-muted/50 px-2 border border-border/20">↵</kbd>
-              New line
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="font-mono rounded bg-muted/50 px-2 border border-border/20">⇧ ↵</kbd>
-              Send
-            </span>
-          </div>
-    )
-}
-
 
 export function EmptyState({ sendPrompt }: { sendPrompt: (prompt?: string | null) => void }) {
   const [isDisabled,setIsDisabled] = useState(false) ;

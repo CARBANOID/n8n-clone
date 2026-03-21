@@ -1,4 +1,4 @@
-import { RefTextarea } from "../ui/textarea";
+import { RefTextarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { RefObject } from "react";
 

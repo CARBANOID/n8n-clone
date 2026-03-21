@@ -1,18 +1,18 @@
 import { memo, useState } from "react";
-import { Button } from "../ui/button"; 
+import { Button } from "./ui/button";
 import Image from "next/image";
-import { AIPromptBox } from "./ai-prompt-box";
+import { AIPromptBox } from "@/features/chatbot/components/prompt-box";
 
 export const AIButton = memo(() => {
-    const [selectorOpen,setSelectorOpen] = useState(false);
+    const [selectorOpen, setSelectorOpen] = useState(false);
 
-    return(
+    return (
         <AIPromptBox
-            open={selectorOpen} 
+            open={selectorOpen}
             onOpenChange={setSelectorOpen}
-        > 
-            <Button 
-                onClick={() => {setSelectorOpen(true)}}
+        >
+            <Button
+                onClick={() => { setSelectorOpen(true) }}
                 size="icon"
                 variant="outline"
                 className="bg-background"

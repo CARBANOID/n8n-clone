@@ -65,9 +65,15 @@ export const AppSideBar = () => {
                      className="gap-x-4 h-10 p-4"
                      asChild
                     >
-                        <Link href="/" prefetch >    {/* prefetch will fetch the content of linked page when current page is loaded thus making it faster*/}
-                            <Image src="/logos/logo.svg" alt="nodebase" width={30} height={30}/>
-                            <span className="font-semibold text-sm"> NodeBase </span>
+                        <Link href="/workflows" prefetch >    {/* prefetch will fetch the content of linked page when current page is loaded thus making it faster*/}
+                            <Image 
+                                src="/logos/logo.svg" 
+                                alt="nexus"  
+                                width={30} 
+                                height={30}
+                                className="pt-1"
+                            />
+                            <span className="font-semibold text-[17px] -ml-[10px] pb-[3px]"> Nexus </span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

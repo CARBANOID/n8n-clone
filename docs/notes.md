@@ -389,7 +389,7 @@ export const requireUnauth = async() => {   // ensures that only unauthenticated
         headers : await headers() ,
     })
     if(session){
-        redirect("/") ;
+        redirect("/workflows") ;
     }
     return session ; 
 }
@@ -1088,7 +1088,7 @@ import type { ReactFlowInstance } from "@xyflow/react";
 import { atom } from "jotai";
 
 export const editorAtom = atom<ReactFlowInstance | null>(null) ;
-```
+``` 
 
 -> add Provider in layout.tsx
 
@@ -1307,7 +1307,7 @@ import { realtimeMiddleware } from "@inngest/realtime/middleware";
 
 
 export const inngest = new Inngest({ 
-    id: "nodebase" ,
+    id: "nexus" ,
     middleware: [realtimeMiddleware()],
 });
 ```
@@ -1735,3 +1735,8 @@ export default function ThemeToggle() {
   );
 }
 ```
+
+# To create chatbot 
+[https://ai-sdk.dev/docs/ai-sdk-ui/chatbot#chatbot]
+-> npm install @ai-sdk/react --legacy-peer-deps
+-> useChat() hook from ai-sdk/react

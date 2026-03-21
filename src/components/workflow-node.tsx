@@ -29,7 +29,7 @@ export const WorkflowNode = ({
                 && 
                 (
                     <NodeToolbar>
-                        <Button size="sm" variant="ghost" onClick={onSettings} title="Delete Node">
+                        <Button size="sm" variant="ghost" onClick={onSettings} title="Settings">
                             <SettingsIcon className="size-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={onDelete} title="Delete Node">

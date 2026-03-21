@@ -24,6 +24,7 @@ model User {
   accounts      Account[]
   workflows     Workflow[]
   credentials   Credential[]
+  conversations Conversation[]
 
   @@unique([email])
   @@map("user")
@@ -77,13 +78,11 @@ model Verification {
   @@map("verification")
 }
 
-
 enum CredentialType {
   OPENAI
   ANTHROPIC
   GEMINI
 }
-
 
 model Credential{
   id                String    @id   @default(cuid())
@@ -97,6 +96,9 @@ model Credential{
   user              User            @relation(fields: [userId] , references: [id] , onDelete: Cascade)
 
   Node              Node[]
+
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, type, updatedAt(sort: Desc)])
 }
 
 model Workflow{
@@ -109,7 +111,11 @@ model Workflow{
   nodes             Node[]
   connections       Connection[]
   executions        Execution[]
+  conversations     Conversation[]
   user              User            @relation(fields: [userId] , references: [id] , onDelete: Cascade)
+
+  @@index([userId, updatedAt(sort: Desc)]) 
+  @@index([userId, name])
 }
 
 enum NodeType {
@@ -123,6 +129,7 @@ enum NodeType {
   OPENAI
   DISCORD
   SLACK
+  EXCEL
 }
 
 model Node{
@@ -142,9 +149,40 @@ model Node{
   updatedAt         DateTime          @updatedAt
 
   credentialId      String?
-  credential        Credential?      @relation(fields: [credentialId] , references: [id])
+  credential        Credential?       @relation(fields: [credentialId] , references: [id])
+
+  @@index([workflowId]) 
 }
 
+model Conversation{
+  id                String      @id   @default(cuid())
+  title             String      
+  userId            String
+  workflowId        String
+  chats             Chat[]
+  user              User        @relation(fields: [userId] , references: [id] , onDelete : Cascade)
+  workflow          Workflow    @relation(fields: [workflowId] , references: [id] , onDelete: Cascade )
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([workflowId, userId,updatedAt(sort: Desc)])
+}
+
+enum ChatRole {
+  USER
+  AI
+}
+
+model Chat {
+  id                String         @id @default(cuid())
+  role              ChatRole
+  message           String
+  createdAt         DateTime       @default(now())
+  conversationId    String
+  conversation      Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt(sort: Asc)])
+}
 
 model Connection{
   id          String  @id   @default(cuid())
@@ -190,5 +228,5 @@ model Execution{
 
   output            Json?
 
-  // @@index([workflowId,startedAt(sort: Desc)]) 
+  @@index([workflowId,startedAt(sort: Desc)]) 
 }

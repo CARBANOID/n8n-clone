@@ -16,6 +16,7 @@ export const AddNodeButton = memo(() => {
                 size="icon"
                 variant="outline"
                 className="bg-background"
+                title="Add Node"
             >
                 <PlusIcon className="size-4"/>
             </Button>

@@ -3,6 +3,12 @@
 export const generateGoogleFormScript = (
   webhookUrl: string,
 ) => `function onFormSubmit(e) {
+  const lock = LockService.getScriptLock() ;
+  if(!lock.tryLock(0)){ 
+    console.log("Duplicate trigger detected, skipping.");
+    return ;
+  }
+
   var formResponse = e.response;
   var itemResponses = formResponse.getItemResponses();
 
@@ -30,11 +36,14 @@ export const generateGoogleFormScript = (
     'payload': JSON.stringify(payload)
   };
 
-  var WEBHOOK_URL = '${webhookUrl}';
+  var WEBHOOK_URL = 'https://overforwardly-sallowy-cammie.ngrok-free.dev/api/webhooks/google-form?workflowId=cml3i3cfw0001vnfg2qu9px2l';
 
   try {
     UrlFetchApp.fetch(WEBHOOK_URL, options);
   } catch(error) {
     console.error('Webhook failed:', error);
+  }
+  finally{
+    lock.releaseLock() ;
   }
 }`;

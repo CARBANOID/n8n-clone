@@ -128,16 +128,18 @@ export const SlackDialog = ({
                                         </FormControl>
                                         <FormDescription>
                                             {/* Webhook can be made with both workflow or App in slack */}
-                                            <h4 className="font-medium text-sm"> Get this from Slack : </h4>
-                                            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                                                <li> Open your Slack Channel</li>
-                                                <li> Go to <u>More</u> &rarr; <u>Tools</u> &rarr; <u>New</u> &rarr; <u>Build Workflow</u></li>
-                                                <li> Select <u>Choose an event</u> &rarr; <u>From a webhook</u> </li>
-                                                <li> Select <u>Create the Webhook</u>  &rarr; Select <u>Set Up Variables</u></li>
-                                                <li> Make sure the name of the Key is <u><b>content</b></u> and click <u>done</u></li>
-                                                <li> Go to Workflow and Open the created workflow </li>
-                                                <li> Select <u>Starts with a webhook</u> &rarr; <u>Copy Web request URL</u> </li>
-                                            </ol>                    
+                                            <div className="space-y-1">
+                                                <h4 className="font-medium text-sm"> Get this from Slack : </h4>
+                                                <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                                                    <li> Open your Slack Channel</li>
+                                                    <li> Go to <u>More</u> &rarr; <u>Tools</u> &rarr; <u>New</u> &rarr; <u>Build Workflow</u></li>
+                                                    <li> Select <u>Choose an event</u> &rarr; <u>From a webhook</u> </li>
+                                                    <li> Select <u>Create the Webhook</u>  &rarr; Select <u>Set Up Variables</u></li>
+                                                    <li> Make sure the name of the Key is <u><b>content</b></u> and click <u>done</u></li>
+                                                    <li> Go to Workflow and Open the created workflow </li>
+                                                    <li> Select <u>Starts with a webhook</u> &rarr; <u>Copy Web request URL</u> </li>
+                                                </ol> 
+                                            </div>                   
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

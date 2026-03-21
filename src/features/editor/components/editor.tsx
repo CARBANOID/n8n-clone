@@ -1,7 +1,7 @@
 "use client"
 import { ErrorView, LoadingView } from "@/components/entity-components"
 import { useSuspenseWorkflow } from "@/features/workflows/hooks/use-workflows"
-import { useState , useCallback, useMemo } from "react"
+import { useState , useCallback, useMemo, useEffect } from "react"
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge,Background, Controls, MiniMap , Panel } from '@xyflow/react';
 import type { Node, Edge, NodeChange, EdgeChange, Connection, ColorMode } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -12,6 +12,21 @@ import { editorAtom } from "../store/atoms";
 import { NodeType } from "@prisma/client";
 import { ExecuteWorkflowButton } from "./execute-worklfow-button";
 import { useTheme } from "next-themes";
+import { AIButton } from "@/components/chatbot/ai-button";
+import { useAIWorkflow } from "../hooks/use-ai-workflow";
+
+function AIWorkflowListener({
+    workflowId,
+    setNodes,
+    setEdges
+}: {
+    workflowId: string;
+    setNodes: (nodes: Node[]) => void;
+    setEdges: (edges: Edge[]) => void;
+}) {
+    useAIWorkflow({ workflowId, setNodes, setEdges });
+    return null;
+}
 
 export const EditorLoading = () => {
    return <LoadingView message="Loading editor..."/>
@@ -47,6 +62,13 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
     },[nodes])
 
     const {theme,setTheme} = useTheme() ;
+    const [mounted,setMounted] = useState(false) ;
+
+    useEffect(() => {
+        setMounted(true) ;
+    },[])
+
+    if(!mounted) return null ;
 
     return (
     <div className="size-full">
@@ -69,13 +91,19 @@ export const Editor = ( { workflowId } : { workflowId : string }) => {
         selectionOnDrag
         colorMode={theme as ColorMode}
       > 
-        <Background/> {/* To add grids in the background */}
-        <Controls/>   {/* To add zoom in and out with lock functionality*/}
-        <MiniMap/>   {/* To create a mini map of the flow */}
+        <Background/>
+        <Controls/>
+        <MiniMap/>
+        
+        <AIWorkflowListener workflowId={workflowId} setNodes={setNodes} setEdges={setEdges} />
       
         <Panel position="top-right">
             {/* To add an custom panel to react flow canvas */}
+            <div className="flex flex-col gap-4">
             <AddNodeButton/>
+            <AIButton/>
+            </div>
+            
         </Panel>
         {
             hasManualTrigger 

@@ -3,10 +3,10 @@ import { NonRetriableError } from "inngest";
 import { generateText } from "ai"
 import { createAnthropic } from "@ai-sdk/anthropic"
 import Handlebars from "handlebars" ;
-import { AVAILABLE_MODELS } from "./dialog";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
 import pClient from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
+import { CLAUDE_MODELS } from "@/config/ai-models";
 
 
 Handlebars.registerHelper("json",(context) =>{ 
@@ -17,7 +17,7 @@ Handlebars.registerHelper("json",(context) =>{
 
 type AnthropicNodeData = {
     variableName? : string,
-    model? : typeof AVAILABLE_MODELS[0],
+    model? : typeof CLAUDE_MODELS[0],
     credentialId? : string,
     systemPrompt? : string,
     userPrompt? : string

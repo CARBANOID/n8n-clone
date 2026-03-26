@@ -99,11 +99,15 @@ import { decrypt } from '@/lib/encryption';
   export async function PUT(req: Request) {
     const { prompt , credential , credentialType , selectedModel } : { prompt : string } & credentialPayload = await req.json();
 
-    const result = await generateText({
-      model: getModel(credential, credentialType, selectedModel),
-      system : "Just provide me a single suitable title for this conversation . No extra text" ,
-      prompt : prompt ,
-    });
-
-    return Response.json(result.content[0]);
+    try { 
+      const result = await generateText({
+        model: getModel(credential, credentialType, selectedModel),
+        system : "Just provide me a single suitable title for this conversation . No extra text" ,
+        prompt : prompt ,
+      });
+      return Response.json(result.content[0],{ status : 200 });
+    }
+    catch(e : any){
+      return Response.json(e.message || JSON.stringify(e),{ status : 500 });
+    }
   }

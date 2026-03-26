@@ -5,6 +5,20 @@ import { useEffect, useRef } from "react";
 import { EmptyState } from "./empty-state";
 import { TypingDots } from "./typing-dots";
 
+const parse = (value: string) => {  
+  const text = value.trim();
+  if((text.startsWith("{") && text.endsWith("}")) || (text.startsWith("[") && text.endsWith("]"))) {
+    try {
+      const parsed = JSON.parse(text);
+      return JSON.stringify(parsed, null, 1) ;
+    } 
+    catch {
+      return value ;
+    }
+  }
+  return value;
+};
+
 type ConversationBoxProps = {
   conversationId: string,
   isChatLoading: boolean,
@@ -76,9 +90,9 @@ export const ConversationBox = ({
                       return (
                         <div
                           key={`${message.id}-${i}`}
-                          className="whitespace-pre-wrap [overflow-wrap:anywhere]"
+                          className="whitespace-pre-wrap text-xs font-mono"
                         >
-                          {part.text}
+                          {parse(part.text)}
                         </div>
                       );
                     }

@@ -98,6 +98,11 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
         })
       })
       const { text }: { text: string } = await res.json();
+
+      if(res.status === 500){
+        toast.error(text) ;
+        return "" ;
+      }
       return text ;
   }
 
@@ -138,6 +143,7 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
 
     if (messages.length === 0 && currentConversationId.length === 0) {
       const text = await getConversationName(prompt) ;
+      if(text === "") return false ;
       const newConversation = await makeConversation(text) ;
       conversationId = newConversation.id ;
     }

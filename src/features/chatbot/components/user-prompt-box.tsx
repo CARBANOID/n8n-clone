@@ -4,7 +4,7 @@ import { RefObject } from "react";
 
 type UserPromptBoxProps = {
     promptRef: RefObject<HTMLTextAreaElement | null>
-    handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+    handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => Promise<void>
 }
 
 export const UserPromptBox = ({

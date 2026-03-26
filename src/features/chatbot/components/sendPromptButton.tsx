@@ -6,7 +6,7 @@ import { RefObject } from "react";
 type SendPromptButtonProps = {
   promptRef: RefObject<HTMLTextAreaElement | null>;
   isPending: boolean;
-  sendPrompt: (prompt: string) => void;
+  sendPrompt: (prompt?: string | null | undefined) => Promise<boolean> ;
 }
 
 export const SendPromptButton = ({
@@ -22,9 +22,9 @@ export const SendPromptButton = ({
         "hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100",
         "bg-primary text-primary-foreground hover:bg-primary/90"
       )}
-      onClick={() => {
+      onClick={async() => {
         if (!promptRef?.current) return;
-        sendPrompt(promptRef.current.value);
+        await sendPrompt(promptRef.current.value);
       }}
       disabled={isPending}
       aria-label="Send message"

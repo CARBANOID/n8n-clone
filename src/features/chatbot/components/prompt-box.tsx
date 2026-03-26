@@ -116,22 +116,22 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
     })
   }
 
-  const sendPrompt = async (prompt?: string | null) => {
+  const sendPrompt = async (prompt?: string | null) : Promise<boolean> => {
     if(!credential || !credentialType) {
       toast.error("Please select a credential") ;
-      return ;
+      return false ;
     }
     
     if(!selectedModel){
        toast.error("Please select a model")
-       return ;
+       return false ;
     }
     
     if (typeof prompt == "string") prompt = prompt.trim();
 
     if (!prompt || !promptRef.current) {
       if (promptRef.current) promptRef.current.focus();
-      return;
+      return false ;
     }
 
     let conversationId : string = currentConversationId ;
@@ -145,13 +145,14 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
     await sendMessageToAI(prompt, conversationId);
     setCurrentConversationId(conversationId);
     promptRef.current.value = "";
+    return true ;
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && e.shiftKey) {
       e.preventDefault();
       if (!promptRef.current || isStreaming || createConversation.isPending || isChatLoading) return;
-      sendPrompt(promptRef.current.value);
+      await sendPrompt(promptRef.current.value);
     }
   };
 
@@ -202,7 +203,7 @@ export function AIPromptBox({ open, onOpenChange, children }: AIPromptBoxProps) 
         <Separator className="opacity-30" />
 
         <ScrollArea className="flex-1 min-h-0">
-          <div className="px-6">
+          <div className="px-6 overflow-hidden w-full">
             <ConversationBox
             conversationId = {currentConversationId}
             isChatLoading = {isChatLoading}

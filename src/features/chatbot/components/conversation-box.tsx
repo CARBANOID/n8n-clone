@@ -10,7 +10,7 @@ type ConversationBoxProps = {
   isChatLoading: boolean,
   isStreaming: boolean,
   messages: UIMessage<unknown, UIDataTypes, UITools>[]
-  sendPrompt: () => void
+  sendPrompt: (prompt?: string | null) => Promise<boolean>
 }
 
 export const ConversationBox = ({
@@ -44,7 +44,7 @@ export const ConversationBox = ({
               <div
                 key={message.id}
                 className={cn(
-                  "flex gap-3 items-start animate-in fade-in slide-in-from-bottom-2 duration-300",
+                  "flex gap-3 items-start animate-in fade-in slide-in-from-bottom-2 duration-300 w-full",
                   isUser && "flex-row-reverse"
                 )}
               >
@@ -76,7 +76,7 @@ export const ConversationBox = ({
                       return (
                         <div
                           key={`${message.id}-${i}`}
-                          className="whitespace-pre-wrap break-words"
+                          className="whitespace-pre-wrap [overflow-wrap:anywhere]"
                         >
                           {part.text}
                         </div>

@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useState } from "react";
 
 
-export function EmptyState({ sendPrompt }: { sendPrompt: (prompt?: string | null) => void }) {
+export function EmptyState({ sendPrompt }: { sendPrompt: (prompt?: string | null ) => Promise<boolean> }) {
   const [isDisabled,setIsDisabled] = useState(false) ;
   const suggestions = [
     {
@@ -47,10 +47,10 @@ export function EmptyState({ sendPrompt }: { sendPrompt: (prompt?: string | null
                 "hover:bg-primary/5 hover:text-foreground hover:border-primary/30 hover:shadow-md",
                 "flex items-start gap-3"
               )}
-              onClick={() => {
-                setIsDisabled(true)
-                sendPrompt(s.text)
-                setIsDisabled(false)
+              onClick={async() => {
+               setIsDisabled(true) ;
+               const res = await sendPrompt(s.text)
+               setIsDisabled(res)
               }}
             >
               <span className="text-lg grayscale group-hover:grayscale-0 transition-all">{s.icon}</span>
